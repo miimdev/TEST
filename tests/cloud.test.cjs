@@ -17,7 +17,7 @@ function setup(result = { data: { data: {}, revision: 3 }, error: null }) {
   const fake = {
     from(table) { requests.push(['from', table]); return query; },
     auth: {
-      async signUp(body) { requests.push(['signup', body]); return { data: {}, error: null }; },
+      async signInWithPassword(body) { requests.push(['login', body]); return { data: { session: { user: { email: body.email } } }, error: null }; },
       async resetPasswordForEmail(email, options) { requests.push(['recover', email, options]); return {}; },
     },
   };
@@ -37,12 +37,16 @@ test('empty write results and server errors cannot be reported as saved', async 
   await assert.rejects(setup({ data: null, error: null }).cloud.save({}, 1), /نسخهٔ جدیدتری/);
   await assert.rejects(setup({ data: null, error: new Error('RLS denied') }).cloud.save({}, 1), /RLS denied/);
 });
-test('activation only requests the configured manager email and production callback', async () => {
+test('manager username is resolved to the existing cloud identity, without a client-side password', async () => {
   const { cloud, requests } = setup();
-  await assert.rejects(cloud.activate('another@example.com', 'test-password'), /ایمیل مدیر/);
-  assert.equal(requests.length, 0);
-  await cloud.activate('resane.Miim@gmail.com', 'test-password');
-  assert.equal(requests[0][1].options.emailRedirectTo, 'https://miimdev.github.io/TEST/admin/');
+  await cloud.login(' mojtaba ', 'arbitrary-test-password');
+  assert.equal(requests[0][1].email, 'resane.miim@gmail.com');
+  assert.equal(requests[0][1].password, 'arbitrary-test-password');
+  await cloud.login('resane.Miim@gmail.com', 'another-test-password');
+  assert.equal(requests[1][1].email, 'resane.miim@gmail.com');
+  await cloud.recover('mojtaba');
+  assert.equal(requests[2][1], 'resane.miim@gmail.com');
+  assert.equal(requests[2][2].redirectTo, 'https://miimdev.github.io/TEST/admin/');
 });
 test('cloud is authoritative and never reads old local drafts', async () => {
   let localReads = 0;

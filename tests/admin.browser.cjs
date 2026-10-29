@@ -18,7 +18,6 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     let failWrite = false;
     let allowAdmin = true;
     let password = 'cloud-test-password';
-    let activation = false;
     let recovered = false;
     const id = randomUUID();
     const user = { id, aud: 'authenticated', role: 'authenticated', email: 'resane.miim@gmail.com', email_confirmed_at: new Date().toISOString(), app_metadata: {}, user_metadata: {}, created_at: new Date().toISOString() };
@@ -31,13 +30,13 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
       const send = (json, status = 200) => route.fulfill({ status, json });
       if (url.pathname === '/auth/v1/token') {
         if (['refresh_token', 'pkce'].includes(url.searchParams.get('grant_type'))) return send(session());
+        assert.equal(body.email, user.email);
         return body.password === password ? send(session()) : send({ msg: 'Invalid login credentials', error_code: 'invalid_credentials' }, 400);
       }
       if (url.pathname === '/auth/v1/user') {
         if (request.method() === 'PUT') password = body.password;
         return send(user);
       }
-      if (url.pathname === '/auth/v1/signup') { activation = true; return send({ user, session: null }); }
       if (url.pathname === '/auth/v1/recover') { recovered = true; return send({}); }
       if (url.pathname === '/auth/v1/logout') return send({});
       if (url.pathname === '/rest/v1/rpc/miim_is_admin') return send(allowAdmin);
@@ -51,21 +50,17 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
       }
       throw new Error('Unexpected mock request ' + request.url());
     });
-    await page.goto(base + '/admin/');
+    await page.goto(base + '/');
+    await page.locator('.nav__admin').click();
+    await page.waitForURL('**/admin/**');
     await page.locator('#username').waitFor({ state: 'visible' });
     assert.equal(await page.locator('#dashboard').isVisible(), false);
     if (process.env.SCREENSHOT_DIR) await page.screenshot({ path: path.join(process.env.SCREENSHOT_DIR, 'login-desktop.png'), fullPage: true });
-    await page.locator('#username').fill(user.email);
+    await page.locator('#username').fill('mojtaba');
     await page.locator('#password').fill('wrong-password');
     await page.locator('#login-submit').click();
     await page.waitForFunction(() => document.getElementById('login-error').dataset.error === 'true');
     assert.equal(await page.locator('#dashboard').isVisible(), false);
-    await page.locator('#activate-mode').click();
-    await page.locator('#password').fill(password);
-    await page.locator('#login-submit').click();
-    await page.waitForFunction(() => !document.getElementById('login-submit').disabled);
-    assert.equal(activation, true);
-    await page.locator('#activate-mode').click();
     await page.locator('#forgot-password').click();
     await page.waitForFunction(() => !document.getElementById('forgot-password').disabled);
     assert.equal(recovered, true);
@@ -126,7 +121,7 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     if (process.env.SCREENSHOT_DIR) await page.screenshot({ path: path.join(process.env.SCREENSHOT_DIR, 'login-mobile.png'), fullPage: true });
     // A valid Supabase user is not necessarily an authorized studio admin.
     allowAdmin = false;
-    await page.locator('#username').fill(user.email);
+    await page.locator('#username').fill('mojtaba');
     await page.locator('#password').fill(password);
     await page.locator('#login-submit').click();
     await page.waitForFunction(() => document.getElementById('login-error').textContent.includes('اجازهٔ مدیریت'));
@@ -144,9 +139,26 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     await recoveryPage.locator('#recovery-form button').click();
     await recoveryPage.locator('#dashboard').waitFor({ state: 'visible' });
     assert.equal(password, 'recovered-test-password');
+    await recoveryPage.locator('#logout').click();
+    await recoveryPage.locator('#login-view').waitFor({ state: 'visible' });
     await recoveryPage.close();
     assert.deepEqual(errors, []);
-    console.log('PASS: graphic desktop/mobile layouts; activation/recovery requests; invalid/valid auth; server authorization; restored session; publish/failure/conflict; export; cloud homepage; password change and logout (mock Supabase API).');
+    console.log('PASS: graphic desktop/mobile layouts; username mapping/recovery requests; invalid/valid auth; server authorization; restored session; publish/failure/conflict; export; cloud homepage; password change and logout (mock Supabase API).');
+    // Mobile header entry remains on-screen and animations respect user preferences.
+    const mobileHome = await context.newPage();
+    await mobileHome.setViewportSize({ width: 390, height: 844 });
+    await mobileHome.goto(base + '/');
+    const entry = mobileHome.locator('.nav__admin');
+    await entry.waitFor({ state: 'visible' });
+    const entryBox = await entry.boundingBox();
+    assert.ok(entryBox.x >= 0 && entryBox.x + entryBox.width <= 390, 'mobile header login must remain visible');
+    await entry.click();
+    await mobileHome.locator('#username').waitFor({ state: 'visible' });
+    assert.equal(await mobileHome.locator('.orbit-inner').evaluate(el => getComputedStyle(el).animationName), 'none');
+    await mobileHome.emulateMedia({ reducedMotion: 'no-preference' });
+    assert.equal(await mobileHome.locator('.orbit-inner').evaluate(el => getComputedStyle(el).animationName), 'ring-spin');
+    await mobileHome.waitForFunction(() => document.getElementById('login-particles').width > 0);
+    await mobileHome.close();
     await context.close();
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

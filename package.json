@@ -4,7 +4,7 @@
   "private": true,
   "description": "Static Persian portfolio with a Supabase-backed command room",
   "scripts": {
-    "build:cloud": "esbuild lib/cloud.js --bundle --minify --format=iife --outfile=vendor/miim-cloud.js --legal-comments=linked",
+    "build:cloud": "esbuild lib/cloud.js --bundle --minify --format=iife --outfile=vendor/miim-cloud.js --legal-comments=linked --supported:template-literal=false",
     "test": "node --test tests/*.test.cjs",
     "test:browser": "node tests/admin.browser.cjs",
     "version:assets": "node scripts/version-assets.cjs",
