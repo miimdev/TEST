@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fa" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>اتاق فرمان | رسانه میم</title>
+  <link rel="icon" href="../Image/logo.png">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="admin.css">
+  <script src="../store.js" defer></script>
+  <script src="admin.js" defer></script>
+</head>
+<body class="admin-page">
+  <main class="admin-shell">
+    <header class="admin-header">
+      <a class="admin-brand" href="../"><img src="../Image/logo.png" alt="" width="44" height="44"><span>رسانه میم <small>اتاق فرمان</small></span></a>
+      <a class="btn btn--ghost" href="../">بازگشت به سایت</a>
+    </header>
+    <p class="admin-notice">این پنل برای مدیریت محلی سایت استاتیک است، نه احراز هویت امن سمت سرور. ذخیره فقط در همین مرورگر اعمال می‌شود؛ برای نمایش عمومی، خروجی را جایگزین فایل <bdi>data.json</bdi> در ریپوزیتوری کنید.</p>
+    <p id="status" class="admin-status" role="status" aria-live="polite">در حال دریافت اطلاعات…</p>
+    <button id="retry" class="btn btn--ghost" type="button" hidden>تلاش مجدد</button>
+
+    <section id="login-view" class="admin-card login-card" aria-labelledby="login-title" hidden>
+      <span class="eyebrow-pill">مدیریت استودیو</span>
+      <h1 id="login-title">ورود به اتاق فرمان</h1>
+      <p>با مشخصات ورود پنل، نمونه‌کارها و اطلاعات تماس را مدیریت کنید.</p>
+      <form id="login-form">
+        <label>نام کاربری<input id="username" name="username" autocomplete="username" dir="ltr" required></label>
+        <label>رمز عبور<span class="password-field"><input id="password" name="password" type="password" autocomplete="current-password" dir="ltr" required><button id="toggle-password" type="button" aria-controls="password" aria-pressed="false">نمایش رمز</button></span></label>
+        <p id="login-error" class="admin-error" role="alert"></p>
+        <button class="btn btn--gold" type="submit">ورود به اتاق فرمان</button>
+      </form>
+    </section>
+
+    <section id="dashboard" aria-labelledby="dashboard-title" hidden>
+      <div class="admin-toolbar"><h1 id="dashboard-title" tabindex="-1">مدیریت سایت</h1><button id="logout" class="btn btn--ghost" type="button">خروج</button></div>
+      <form id="editor">
+        <section class="admin-card"><h2>نمونه‌کارها</h2><p>مشخصات و لینک سایت هر پروژه را ویرایش کنید. برای آثار گرافیکی، لینک را خالی بگذارید.</p><div id="works-editor"></div></section>
+        <section class="admin-card"><h2>اطلاعات تماس</h2><div class="admin-grid">
+          <label>شماره تماس<input id="contact-phone" type="tel" required dir="ltr"></label>
+          <label>ایمیل<input id="contact-email" type="email" dir="ltr"></label>
+          <label>شناسه<input id="contact-id" dir="ltr"></label>
+        </div></section>
+        <div class="admin-actions"><button class="btn btn--gold" type="submit">ذخیره در این مرورگر</button><button id="download" class="btn btn--ghost" type="button">دریافت فایل انتشار (data.json)</button><a class="btn btn--ghost" href="../" target="_blank" rel="noopener">پیش‌نمایش سایت ↗</a></div>
+        <p id="save-status" role="status" aria-live="polite"></p>
+      </form>
+      <section class="admin-card"><h2>تغییر مشخصات ورود</h2><p>این تغییر در همین مرورگر ذخیره می‌شود؛ برای استفاده در مرورگرهای دیگر، بعد از تغییر، خروجی انتشار را دریافت کنید.</p>
+        <form id="credentials-form"><div class="admin-grid">
+          <label>نام کاربری جدید<input id="new-username" autocomplete="username" dir="ltr" minlength="3" required></label>
+          <label>رمز جدید<input id="new-password" type="password" autocomplete="new-password" dir="ltr" minlength="6" required></label>
+          <label>تکرار رمز جدید<input id="confirm-password" type="password" autocomplete="new-password" dir="ltr" minlength="6" required></label>
+        </div><button class="btn btn--ghost" type="submit">تغییر مشخصات ورود</button><p id="credentials-status" role="status" aria-live="polite"></p></form>
+      </section>
+    </section>
+    <noscript>برای ورود و مدیریت سایت، جاوااسکریپت مرورگر را فعال کنید.</noscript>
+  </main>
+</body>
+</html>
