@@ -2,7 +2,7 @@
    Keep form editing, browser keyboard shortcuts and admin tools usable. */
 (() => {
   'use strict';
-  const protectedMedia = 'img, picture, .stage-card, .work-tile, .portrait-arch, .case-modal__media';
+  const protectedMedia = 'img, picture, .stage-card, .work-tile, .reactor-art, .case-modal__media';
   const editable = 'input, textarea, select, [contenteditable]:not([contenteditable="false"])';
   function isProtected(target, type) {
     const element = target instanceof Element ? target : target?.parentElement;
