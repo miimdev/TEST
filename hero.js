@@ -9,11 +9,13 @@
   }
 })(typeof window === 'object' ? window : globalThis, function () {
   'use strict';
+  const INTRO_DURATION = 2600;
   const clamp = value => Math.max(0, Math.min(100, Number(value) || 0));
   let dispose = () => {};
   function start() {
     dispose();
     const stage = document.getElementById('hero-stage'), poster = document.getElementById('portrait-poster');
+    const photo = document.getElementById('hero-photo');
     const toggle = document.getElementById('hero-motion-toggle'), replay = document.getElementById('hero-replay');
     if (!stage || !poster || !toggle || !replay) return;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)'), fine = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -31,11 +33,13 @@
     function playIntro() {
       finishIntro();
       if (!running) return;
-      // Restart only on explicit replay or the first appearance, not every scroll.
+      // Separate style frames so even a rapid replay starts a fresh timeline.
       introFrame = requestAnimationFrame(() => {
-        if (!running) return;
-        stage.classList.add('is-poster-entering');
-        introTimer = setTimeout(finishIntro, 1350);
+        introFrame = requestAnimationFrame(() => {
+          if (!running) return;
+          stage.classList.add('is-poster-entering');
+          introTimer = setTimeout(finishIntro, INTRO_DURATION);
+        });
       });
     }
     function updateState() {
@@ -46,7 +50,11 @@
       toggle.setAttribute('aria-pressed', String(paused || reduced.matches));
       toggle.querySelector('span').textContent = reduced.matches ? 'حرکت کاهش‌یافته' : paused ? 'پخش حرکت' : 'توقف حرکت';
       if (!running) { resetLight(); finishIntro(); }
-      if (visible && !entered && document.documentElement.classList.contains('is-ready')) { entered = true; playIntro(); }
+      // The global curtain used to cover most of the entrance. Wait for its
+      // removal and a loaded photo; on mobile this also waits for scrolling in.
+      if (visible && !entered && document.documentElement.classList.contains('is-ready') && !document.getElementById('loader') && (!photo || (photo.complete && photo.naturalWidth > 0))) {
+        entered = true; readyObserver.disconnect(); playIntro();
+      }
     }
     function move(event) {
       if (!running || !fine.matches || event.pointerType === 'touch') return;
@@ -68,10 +76,11 @@
       observer = new IntersectionObserver(entries => { visible = entries[0].isIntersecting; updateState(); }, { threshold: 0 });
       observer.observe(stage);
     }
-    const readyObserver = new MutationObserver(() => {
-      if (document.documentElement.classList.contains('is-ready')) { updateState(); readyObserver.disconnect(); }
-    });
-    if (!document.documentElement.classList.contains('is-ready')) readyObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    const readyObserver = new MutationObserver(updateState);
+    readyObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    const loader = document.getElementById('loader');
+    if (loader?.parentNode) readyObserver.observe(loader.parentNode, { childList: true });
+    photo?.addEventListener('load', updateState);
     toggle.addEventListener('click', toggleMotion); replay.addEventListener('click', playIntro);
     poster.addEventListener('pointermove', move, { passive: true }); poster.addEventListener('pointerleave', resetLight);
     reduced.addEventListener('change', preferenceChanged); fine.addEventListener('change', preferenceChanged);
@@ -79,6 +88,7 @@
     updateState();
     dispose = () => {
       running = false; resetLight(); finishIntro(); observer?.disconnect(); readyObserver.disconnect();
+      photo?.removeEventListener('load',updateState);
       toggle.removeEventListener('click',toggleMotion); replay.removeEventListener('click',playIntro);
       poster.removeEventListener('pointermove',move); poster.removeEventListener('pointerleave',resetLight);
       reduced.removeEventListener('change',preferenceChanged); fine.removeEventListener('change',preferenceChanged);
@@ -86,5 +96,5 @@
       stage.classList.remove('is-poster-running'); stage.dataset.posterState = 'stopped';
     };
   }
-  return { clamp, start, stop: () => dispose() };
+  return { INTRO_DURATION, clamp, start, stop: () => dispose() };
 });
