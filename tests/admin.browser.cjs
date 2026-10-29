@@ -219,9 +219,31 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
       assert.equal(await home.locator('.stage-card__overlay').first().evaluate((el,type)=>!el.dispatchEvent(new Event(type,{bubbles:true,cancelable:true})),type),true);
       assert.equal(await home.locator('#order-form input:not([type=hidden])').first().evaluate((el,type)=>!el.dispatchEvent(new Event(type,{bubbles:true,cancelable:true})),type),false);
     }
+    for(const type of ['dragstart','selectstart']) {
+      for(const selector of ['#hero-title','#c-mail-link','[data-bind=contactLead]']) {
+        assert.equal(await home.locator(selector).evaluate((el,type)=>!el.dispatchEvent(new Event(type,{bubbles:true,cancelable:true})),type),true);
+      }
+    }
+    assert.equal(await home.locator('#hero-title').evaluate(el=>getComputedStyle(el).userSelect),'none');
+    // Real mouse selection on public text should produce no selection.
+    const publicText=home.locator('[data-bind=contactLead]');
+    await publicText.scrollIntoViewIfNeeded();
+    await home.evaluate(()=>getSelection().removeAllRanges());
+    const textBox=await publicText.boundingBox();
+    await home.mouse.move(textBox.x+textBox.width-5,textBox.y+10);
+    await home.mouse.down();
+    await home.mouse.move(textBox.x+5,textBox.y+textBox.height-5,{steps:12});
+    await home.mouse.up();
+    assert.equal(await home.evaluate(()=>getSelection().toString()),'');
     assert.equal(await home.locator('#c-mail-link').evaluate(el=>el.dispatchEvent(new Event('contextmenu',{bubbles:true,cancelable:true}))),true);
     await home.locator('#order-form input[name=name]').fill('آزمایش فرم');
     assert.equal(await home.locator('#order-form input[name=name]').inputValue(),'آزمایش فرم');
+    const nameField=home.locator('#order-form input[name=name]');
+    assert.equal(await nameField.evaluate(el=>getComputedStyle(el).userSelect),'text');
+    await nameField.press('ControlOrMeta+A');
+    assert.equal(await nameField.evaluate(el=>el.selectionEnd-el.selectionStart),'آزمایش فرم'.length);
+    await nameField.press('Backspace');
+    await nameField.fill('فرم همچنان قابل ویرایش است');
     await home.evaluate(()=>{const img=document.createElement('img');img.id='dynamic-guard-test';document.body.append(img);});
     await home.waitForFunction(()=>document.getElementById('dynamic-guard-test').draggable===false);
     const published=structuredClone(row.data);
@@ -266,7 +288,7 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     await recoveryPage.locator('#login-view').waitFor({ state: 'visible' });
     await recoveryPage.close();
     assert.deepEqual(errors, []);
-    console.log('PASS: Rubika link/icon, image context/drag/selection guards and usable forms; expanded CMS, project add/copy/delete/search/upload, hero/services/SEO edits, draft persistence, history/import restore, public rendering; graphic desktop/mobile layouts; username mapping/recovery requests; invalid/valid auth; server authorization; restored session; publish/failure/conflict; export; cloud homepage; password change and logout (mock Supabase API).');
+    console.log('PASS: Rubika link/icon, text/image drag and selection guards, real mouse selection and editable forms; expanded CMS, project add/copy/delete/search/upload, hero/services/SEO edits, draft persistence, history/import restore, public rendering; graphic desktop/mobile layouts; username mapping/recovery requests; invalid/valid auth; server authorization; restored session; publish/failure/conflict; export; cloud homepage; password change and logout (mock Supabase API).');
     // Mobile header entry remains on-screen and animations respect user preferences.
     const mobileHome = await context.newPage();
     await mobileHome.setViewportSize({ width: 390, height: 844 });

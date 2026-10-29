@@ -1918,7 +1918,13 @@ html.is-ready .hero__reveal {
 .nav__tool.nav__admin { width: auto; min-width: 90px; padding: 0 12px; border-radius: 999px; display: inline-flex; gap: 7px; font-size: 11px; color: var(--gold); background: var(--gold-soft); border-color: var(--stroke-hi); white-space: nowrap; }
 @media (max-width: 520px) { .nav__tool.nav__admin { min-width: 72px; padding-inline: 8px; gap: 4px; font-size: 10px; } }
 
-/* Casual image-copy deterrents, not DRM. Keep contact text and forms usable. */
+/* Public text/image selection deterrents, not DRM. Admin uses a separate stylesheet. */
+body { -webkit-user-select: none; user-select: none; }
+input, textarea, select, [contenteditable]:not([contenteditable="false"]),
+[contenteditable]:not([contenteditable="false"]) * {
+  -webkit-user-select: text;
+  user-select: text;
+}
 img, picture, .stage-card, .work-tile, .portrait-arch, .case-modal__media {
   -webkit-user-drag: none;
   -webkit-touch-callout: none;
