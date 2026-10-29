@@ -1,20 +1,21 @@
 <!doctype html>
-<html lang="fa" dir="rtl" data-theme="light">
+<html lang="fa" dir="rtl" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="theme-color" content="#234d48">
+  <meta name="theme-color" content="#070709">
   <title>اتاق فرمان | رسانه میم</title>
   <link rel="icon" href="../Image/logo.png">
-  <link rel="stylesheet" href="../style.css?v=710720a1bb62">
-  <link rel="stylesheet" href="admin.css?v=d5a5f47d4315">
-  <script src="../vendor/miim-cloud.js?v=b53d8abdd4cf" defer></script>
+  <link rel="stylesheet" href="../style.css?v=a9549c148d88">
+  <link rel="stylesheet" href="admin.css?v=d2babe1927f7">
+  <script src="../vendor/miim-cloud.js?v=0ede1e0f746e" defer></script>
   <script src="../store.js?v=15ceb76922e5" defer></script>
-  <script src="admin.js?v=9fe7ff0e43f5" defer></script>
+  <script src="motion.js?v=2ef15a9a61cd" defer></script>
+  <script src="admin.js?v=a28579d1e4de" defer></script>
 </head>
 <body class="admin-page">
-  <div class="page-grain" aria-hidden="true"></div>
+  <div class="page-grain" aria-hidden="true"></div><div class="ambient-light" aria-hidden="true"></div>
   <header class="public-header">
     <a class="brand" href="../"><img src="../Image/logo.png" alt="" width="46" height="46"><span>رسانه میم<small>استودیو خلاقیت دیجیتال</small></span></a>
     <a class="back-link" href="../">بازگشت به وب‌سایت <span aria-hidden="true">↗</span></a>
@@ -24,29 +25,34 @@
     <section id="login-view" class="login-layout" aria-labelledby="login-title" hidden>
       <div class="login-form-panel">
         <div class="login-topline"><span class="eyebrow">MIIM / STUDIO ACCESS</span><span class="mini-badge">ورود مدیر</span></div>
-        <div class="login-heading"><div class="lock-symbol" aria-hidden="true">⌘</div><h1 id="login-title">به فضای خلاقیت<br>خودت خوش آمدی<span>.</span></h1><p id="login-description">از اینجا، داستان برندت را مدیریت کن.<br>برای ورود به اتاق فرمان، مشخصات حسابت را وارد کن.</p></div>
+        <div class="login-heading"><div class="lock-symbol" aria-hidden="true"><img src="../Image/logo.png" alt=""></div><h1 id="login-title">به فضای خلاقیت<br>خودت خوش آمدی<span>.</span></h1><p id="login-description">از اینجا، داستان برندت را مدیریت کن.<br>با نام کاربری و رمز خودت، وارد اتاق فرمان شو.</p></div>
         <form id="login-form">
-          <label for="username">آدرس ایمیل <span class="label-en">EMAIL ADDRESS</span></label>
-          <div class="input-wrap"><span aria-hidden="true">@</span><input id="username" name="email" type="email" autocomplete="username" dir="ltr" placeholder="you@example.com" required></div>
+          <label for="username">نام کاربری <span class="label-en">USERNAME</span></label>
+          <div class="input-wrap"><span aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg></span><input id="username" name="username" type="text" autocomplete="username" dir="ltr" placeholder="mojtaba" autocapitalize="none" spellcheck="false" required></div>
           <div class="password-label"><label for="password">رمز عبور <span class="label-en">PASSWORD</span></label><button id="forgot-password" class="text-button" type="button">رمز را فراموش کرده‌ام</button></div>
           <div class="input-wrap"><button id="toggle-password" type="button" aria-controls="password" aria-pressed="false" aria-label="نمایش رمز عبور"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button><input id="password" name="password" type="password" autocomplete="current-password" dir="ltr" placeholder="رمز عبور شما" required></div>
           <p id="login-error" class="form-feedback" role="alert"></p>
           <button id="login-submit" class="primary-button login-submit" type="submit"><span id="login-submit-label">ورود به اتاق فرمان</span><span aria-hidden="true">←</span></button>
-          <div class="activate-row"><span id="activate-caption">اولین بار است وارد می‌شوی؟</span><button id="activate-mode" class="text-button" type="button">فعال‌سازی حساب مدیر</button></div>
+          <div class="activate-row"><span class="status-dot"></span> دسترسی اختصاصی مدیر استودیو <span class="username-hint" dir="ltr">mojtaba</span></div>
         </form>
         <div class="login-security"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg><span>ورود امن با Supabase Auth <small>فقط برای مدیر تأییدشدهٔ استودیو</small></span></div>
       </div>
-      <aside class="login-art" aria-label="تصویرسازی فضای طراحی رسانه میم">
-        <div class="art-grid" aria-hidden="true"></div><span class="art-kicker">YOUR NEXT BIG IDEA STARTS HERE</span>
-        <div class="orb orb-one" aria-hidden="true"></div><div class="orb orb-two" aria-hidden="true"></div>
-        <div class="art-composition" aria-hidden="true">
-          <div class="floating-label label-design"><span>✦</span> طراحی، بدون مرز</div>
-          <div class="browser-art"><div class="browser-top"><i></i><i></i><i></i><span>miim.studio / creative space</span></div><div class="browser-body"><div class="art-menu"><b>miim<span>®</span></b><span>ABOUT &nbsp; WORK &nbsp; CONTACT</span></div><div class="art-main"><span class="art-small">A LITTLE STRATEGY. A LOT OF SOUL.</span><strong>MAKE<br>IT <em>MATTER.</em></strong><div class="art-star">✳</div><div class="art-footer"><span>DESIGN THAT<br>MAKES A DIFFERENCE.</span><span>↗</span></div></div></div></div>
-          <div class="palette-card"><span>پالت خلاقیت</span><div><i></i><i></i><i></i><i></i></div><small>CURATED BY MIIM</small></div>
-          <div class="floating-label label-cloud"><span class="status-dot"></span> متصل به فضای ابری</div>
-          <div class="cursor-art">➤<span>شما، در مرکز خلاقیت</span></div>
+      <aside class="login-art" aria-label="هستهٔ متحرک استودیو رسانه میم">
+        <canvas id="login-particles" aria-hidden="true"></canvas>
+        <div class="art-grid" aria-hidden="true"></div>
+        <div class="art-top"><span class="art-kicker">RESANE MIIM / CREATIVE CORE</span><span class="live-chip"><i class="status-dot"></i> فضای خلاقیت</span></div>
+        <div class="core-stage" aria-hidden="true">
+          <div class="core-halo"></div><div class="core-orbit orbit-outer"></div><div class="core-orbit orbit-middle"></div><div class="core-orbit orbit-inner"></div>
+          <div class="orbit-track track-one"><i></i></div><div class="orbit-track track-two"><i></i></div>
+          <div class="core-crosshair crosshair-one"></div><div class="core-crosshair crosshair-two"></div>
+          <div class="core-emblem"><div class="emblem-shine"></div><img src="../Image/logo.png" alt=""><span class="core-check">✓</span></div>
+          <span class="core-coordinate coord-top">35° 41′ N / CREATIVE ENERGY</span><span class="core-coordinate coord-bottom">SYSTEM READY · YOUR NEXT CHAPTER</span>
+          <div class="core-chip chip-design"><span>✦</span><div>طراحی بی‌مرز<small>DESIGN / 01</small></div></div>
+          <div class="core-chip chip-code"><span>⌘</span><div>ساختن تجربه<small>DEVELOPMENT / 02</small></div></div>
+          <div class="core-chip chip-cloud"><span>◈</span><div>یکپارچه و متصل<small>CONNECTED / 03</small></div></div>
         </div>
-        <div class="art-copy"><span class="eyebrow">یک فضا، بی‌نهایت ایده</span><h2>همه‌چیز برای ساختن<br>یک تجربهٔ ماندگار.</h2><p>پروژه‌ها، ایده‌ها و هویت دیجیتال تو؛<br>مرتب، یکپارچه و همیشه در دسترس.</p></div><div class="art-bottom"><span>RESANE MIIM © 2026</span><span>STRATEGY × DESIGN × CODE</span></div>
+        <div class="art-copy"><span class="eyebrow">در مرز هنر و تکنولوژی</span><h2>اینجا ایده‌ها<br><em>جان می‌گیرند.</em></h2><p>پشت صحنهٔ تجربه‌های ماندگار؛<br>جایی برای خلق، مدیریت و درخشش.</p></div>
+        <div class="art-bottom"><span>MIIM STUDIO © 2026</span><span>STRATEGY × DESIGN × CODE</span></div>
       </aside>
     </section>
 

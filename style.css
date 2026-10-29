@@ -1913,3 +1913,7 @@ html.is-ready .hero__reveal {
   transition: all 0.32s var(--ease-spring);
 }
 .site-toast.is-in { opacity: 1; transform: translateY(0); }
+
+/* Explicit, discoverable command-room entry on desktop and mobile. */
+.nav__tool.nav__admin { width: auto; min-width: 90px; padding: 0 12px; border-radius: 999px; display: inline-flex; gap: 7px; font-size: 11px; color: var(--gold); background: var(--gold-soft); border-color: var(--stroke-hi); white-space: nowrap; }
+@media (max-width: 520px) { .nav__tool.nav__admin { min-width: 72px; padding-inline: 8px; gap: 4px; font-size: 10px; } }

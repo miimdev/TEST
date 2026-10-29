@@ -7,7 +7,6 @@
   let data = null;
   let revision = null;
   let dirty = false;
-  let activation = false;
   let recovery = false;
   let currentUser = null;
   let busy = false;
@@ -18,7 +17,7 @@
   function message(id, text, error = false) { $(id).textContent = text; $(id).dataset.error = String(error); }
   function friendly(error) {
     const text = String(error?.message || error);
-    if (/Invalid login credentials/i.test(text)) return 'ایمیل یا رمز عبور درست نیست. برای اولین ورود، حساب مدیر را فعال کن.';
+    if (/Invalid login credentials/i.test(text)) return 'نام کاربری یا رمز عبور درست نیست.';
     if (/Email not confirmed/i.test(text)) return 'ابتدا ایمیل تأیید حساب را در صندوق ایمیلت باز کن.';
     if (/rate limit|too many|security purposes/i.test(text)) return 'تعداد درخواست‌ها زیاد است. چند دقیقه دیگر دوباره تلاش کن.';
     if (/fetch|network|timeout|abort/i.test(text)) return 'ارتباط با فضای ابری برقرار نشد. اینترنت را بررسی و دوباره تلاش کن.';
@@ -127,10 +126,16 @@
     revision = row.revision;
     renderEditor(); setDirty(false);
   }
-  async function openDashboard() {
+  async function openDashboard(animate = false) {
     await authorize();
     await readContent();
+    if (animate) {
+      document.querySelector('.login-layout').classList.add('is-unlocked');
+      message('login-error', 'احراز هویت موفق؛ به استودیو خوش آمدی.');
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) await new Promise(resolve => setTimeout(resolve, 700));
+    }
     document.body.classList.add('is-dashboard');
+    document.querySelector('.login-layout').classList.remove('is-unlocked');
     $('login-view').hidden = true; $('recovery-view').hidden = true; $('dashboard').hidden = false;
     $('password').value = ''; $('account-email').textContent = currentUser.email;
     $('dashboard-title').focus();
@@ -176,30 +181,25 @@
     }
   }
   $('retry').addEventListener('click', load);
-  $('activate-mode').addEventListener('click', () => {
-    activation = !activation;
-    $('login-submit-label').textContent = activation ? 'ساخت حساب و ارسال تأییدیه' : 'ورود به اتاق فرمان';
-    $('activate-mode').textContent = activation ? 'بازگشت به ورود' : 'فعال‌سازی حساب مدیر';
-    $('activate-caption').textContent = activation ? 'قبلاً حساب ساخته‌ای؟' : 'اولین بار است وارد می‌شوی؟';
-    $('password').minLength = activation ? 8 : 1;
-    $('password').autocomplete = activation ? 'new-password' : 'current-password';
-    if (activation) $('username').value = cloud.adminEmail;
-    message('login-error', activation ? 'فقط ایمیل مدیر قابل فعال‌سازی است. رمز جدید و قوی انتخاب کن و بعد ایمیل تأیید را باز کن.' : '');
-  });
   $('login-form').addEventListener('submit', async event => {
     event.preventDefault();
     $('login-submit').disabled = true;
+    document.body.classList.add('is-signing-in');
+    $('login-submit-label').textContent = 'در حال ورود…';
     message('login-error', 'در حال ارتباط با حساب شما…');
     try {
       const email = $('username').value.trim();
       const password = $('password').value;
-      if (activation) {
-        await cloud.activate(email, password);
-        $('password').value = '';
-        message('login-error', 'در صورت امکان ثبت حساب، ایمیل تأیید ارسال شده است. پوشهٔ Spam را هم بررسی کن؛ پس از تأیید، به حالت ورود برگرد. اگر قبلاً حساب داری، از بازیابی رمز استفاده کن.');
-      } else { await cloud.login(email, password); await openDashboard(); message('login-error', ''); }
-    } catch (error) { message('login-error', friendly(error), true); }
-    finally { $('login-submit').disabled = false; }
+      await cloud.login(email, password); await openDashboard(true); message('login-error', '');
+    } catch (error) {
+      message('login-error', friendly(error), true);
+      const panel = document.querySelector('.login-form-panel');
+      panel.classList.remove('is-rejected'); void panel.offsetWidth; panel.classList.add('is-rejected');
+    }
+    finally {
+      $('login-submit').disabled = false; document.body.classList.remove('is-signing-in');
+      $('login-submit-label').textContent = 'ورود به اتاق فرمان';
+    }
   });
   $('forgot-password').addEventListener('click', async () => {
     if (!$('username').reportValidity()) return;
