@@ -510,7 +510,7 @@ const DEFAULT_SITE = {
     }
 
     const orderForm = $("#order-form");
-    if (orderForm) orderForm.action = c.formspree || "#";
+    if (orderForm) orderForm.action = 'https://jmpwryddrxmuwzmbmhsb.supabase.co/functions/v1/miim-rubika';
 
     const waDigits = intl.replace("+", "");
     const quickWa = $("#quick-wa");
@@ -1133,12 +1133,13 @@ const DEFAULT_SITE = {
     const submitBtn = $("#order-submit");
     const latinDigits = (s) => String(s).replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
 
+    let pendingOrder = null;
     form?.addEventListener("submit", (e) => {
+      if (submitBtn.disabled) { e.preventDefault(); return; }
       e.preventDefault();
       status.className = "order-status";
       status.textContent = "";
 
-      if (!SITE.contact.formspree) { status.className = "order-status is-err"; status.textContent = "فرم آنلاین فعلاً غیرفعال است؛ از واتساپ یا تماس استفاده کنید."; return; }
       let ok = true;
       $$("[required]", form).forEach((inp) => {
         const wrap = inp.closest(".field");
@@ -1161,28 +1162,30 @@ const DEFAULT_SITE = {
       span.textContent = "در حال ثبت درخواست…";
       submitBtn.disabled = true;
 
-      fetch(form.action, {
-        method: "POST",
-        body: new FormData(form),
-        headers: { Accept: "application/json" },
-      })
-        .then((r) => {
-          if (r.ok) {
-            form.reset();
-            status.className = "order-status is-ok";
-            status.textContent = "درخواست شما با موفقیت ثبت شد! به‌زودی با شما تماس می‌گیرم.";
-            showToast("سفارش شما با موفقیت ارسال شد");
-          } else {
-            status.className = "order-status is-err";
-            status.textContent = "خطا در ارسال؛ می‌توانید دکمه «ارسال آنی در واتساپ» را بزنید.";
-          }
+      const payload = Object.fromEntries(new FormData(form));
+      const fingerprint = JSON.stringify(payload);
+      if (!pendingOrder || pendingOrder.fingerprint !== fingerprint) pendingOrder = { fingerprint, id: crypto.randomUUID() };
+      form.querySelectorAll('input,textarea,button').forEach(el => { el.disabled = true; });
+      const request = window.MiimCloud?.bot('order', { ...payload, id: pendingOrder.id });
+      Promise.resolve(request || Promise.reject(new Error('سرویس سفارش بارگذاری نشده است.')))
+        .then((result) => {
+          if (!result?.ok) throw new Error('ثبت درخواست تأیید نشد؛ دوباره تلاش کنید.');
+          const service = $('#selected-service').value, budget = $('#selected-budget').value;
+          form.reset(); pendingOrder = null;
+          $('#selected-service').value = service; $('#selected-budget').value = budget;
+          status.className = "order-status is-ok";
+          status.textContent = result.delivery === 'sent'
+            ? "درخواست ثبت شد و از طریق ربات روبیکا به مدیر رسید."
+            : "درخواست شما در صندوق سفارش‌های مدیر ثبت شد؛ به‌زودی با شما تماس می‌گیرم.";
+          showToast("سفارش شما با موفقیت ثبت شد");
         })
-        .catch(() => {
+        .catch((error) => {
           status.className = "order-status is-err";
-          status.textContent = "عدم دسترسی به شبکه؛ از دکمه «ارسال آنی در واتساپ» استفاده کنید.";
+          status.textContent = error.message || "ارسال تأیید نشد؛ دوباره تلاش کنید یا مستقیم پیام بدهید.";
         })
         .finally(() => {
           span.textContent = prevTxt;
+          form.querySelectorAll('input,textarea,button').forEach(el => { el.disabled = false; });
           submitBtn.disabled = false;
         });
     });

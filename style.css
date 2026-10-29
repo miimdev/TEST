@@ -1932,3 +1932,6 @@ img, picture, .stage-card, .work-tile, .portrait-arch, .case-modal__media {
   user-select: none;
 }
 .social-pill__icon { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
+
+.order-honeypot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.order-privacy { font-size: 11px; line-height: 1.9; color: var(--txt-3); margin-top: 14px; }

@@ -17,6 +17,8 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     let row = { data: structuredClone(snapshot), revision: 2, updated_at: new Date().toISOString() };
     const history = [];
     let uploads=0;
+    let botPaired=false, botRejectOrder=false, botDelivery='queued';
+    const orderRequests=[], botCalls=[];
     let failWrite = false;
     let allowAdmin = true;
     let password = 'cloud-test-password';
@@ -30,6 +32,18 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
       const url = new URL(request.url());
       const body = request.headers()['content-type']?.includes('application/json') ? request.postDataJSON() : null;
       const send = (json, status = 200) => route.fulfill({ status, json });
+      if (url.pathname === '/functions/v1/miim-rubika') {
+        botCalls.push(body);
+        if(body.action==='status')return send({configured:true,paired:botPaired});
+        if(body.action==='prepare')return send({code:'MIIM-0123456789abcdef0123456789abcdef',expiresIn:600});
+        if(body.action==='connect'){botPaired=true;return send({ok:true,paired:true});}
+        if(body.action==='test')return send({ok:true});
+        if(body.action==='published')return send({delivery:'sent'});
+        if(body.action==='inbox')return send({orders:[{id:'d45ebbec-ff4d-48b8-8860-177795b29d2d',payload:{name:'مشتری آزمایشی',phone:'09123456789',service:'وب',budget:'شرکتی',message:'<script>alert(1)</script>',email:''},state:'failed',created_at:new Date().toISOString()}]});
+        if(body.action==='retry')return send({delivery:'sent'});
+        if(body.action==='order'){orderRequests.push(body);return botRejectOrder?send({ok:false,error:'service_unavailable'},503):send({ok:true,id:body.id,delivery:botDelivery});}
+        throw new Error('Unknown bot action');
+      }
       if (url.pathname === '/auth/v1/token') {
         if (['refresh_token', 'pkce'].includes(url.searchParams.get('grant_type'))) return send(session());
         assert.equal(body.email, user.email);
@@ -82,6 +96,21 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     await page.locator('#dashboard').waitFor({ state: 'visible' });
     assert.equal(await page.locator('.work-editor').count(), 4);
     assert.notEqual(await page.locator('#dashboard-title').evaluate(el=>getComputedStyle(el).userSelect),'none');
+    await page.waitForFunction(()=>document.getElementById('bot-feedback').textContent.includes('هنوز پیوی'));
+    await page.locator('#bot-prepare').click();
+    await page.locator('#bot-code').waitFor({state:'visible'});
+    assert.match(await page.locator('#bot-code').textContent(),/^MIIM-/);
+    await page.locator('#bot-connect').click();
+    await page.waitForFunction(()=>document.getElementById('bot-feedback').textContent.includes('پیوی متصل شد'));
+    await page.locator('#bot-test').click();
+    await page.waitForFunction(()=>document.getElementById('bot-feedback').textContent.includes('ارسال پیام آزمایشی'));
+    await page.locator('#bot-inbox').click();
+    await page.locator('.bot-order').waitFor({state:'visible'});
+    assert.match(await page.locator('.bot-order-message').textContent(),/<script>alert/);
+    assert.equal(await page.locator('.bot-order script').count(),0);
+    page.once('dialog',d=>d.accept());await page.locator('.bot-order button').click();
+    await page.waitForFunction(()=>document.getElementById('bot-feedback').textContent.includes('ارسال‌شده'));
+
     if (process.env.SCREENSHOT_DIR) await page.screenshot({ path: path.join(process.env.SCREENSHOT_DIR, 'dashboard-desktop.png'), fullPage: true });
     await page.setViewportSize({ width: 390, height: 844 });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
@@ -247,6 +276,26 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     await nameField.fill('فرم همچنان قابل ویرایش است');
     await home.evaluate(()=>{const img=document.createElement('img');img.id='dynamic-guard-test';document.body.append(img);});
     await home.waitForFunction(()=>document.getElementById('dynamic-guard-test').draggable===false);
+    // Actual SDK form submission: failure retains fields and retry reuses the request ID.
+    botRejectOrder=true;
+    await home.locator('#f-name').fill('سفارش آزمایشی');
+    await home.locator('#f-phone').fill('09123456789');
+    await home.locator('#f-msg').fill('پیام نمونه به ربات');
+    await home.locator('#order-submit').click();
+    await home.waitForFunction(()=>!document.getElementById('order-submit').disabled && document.getElementById('order-status').classList.contains('is-err'));
+    assert.equal(await home.locator('#f-name').inputValue(),'سفارش آزمایشی');
+    botRejectOrder=false;
+    await home.locator('#order-submit').click();
+    await home.waitForFunction(()=>document.getElementById('order-status').classList.contains('is-ok'));
+    assert.equal(orderRequests[0].id,orderRequests[1].id);
+    assert.equal(await home.locator('#f-name').inputValue(),'');
+    assert.match(await home.locator('#order-status').textContent(),/صندوق سفارش/);
+    botDelivery='sent';
+    await home.locator('#f-name').fill('سفارش دوم');await home.locator('#f-phone').fill('09123456780');await home.locator('#f-msg').fill('پیام دوم');
+    await home.locator('#order-submit').click();
+    await home.waitForFunction(()=>document.getElementById('order-status').textContent.includes('به مدیر رسید'));
+    assert.notEqual(orderRequests.at(-1).id,orderRequests[0].id);
+    assert.ok(botCalls.some(c=>c.action==='published'));
     const published=structuredClone(row.data);
     row.data.works[4].visible=false;
     await home.reload();await home.locator('.stage-card').first().waitFor();
@@ -289,7 +338,7 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     await recoveryPage.locator('#login-view').waitFor({ state: 'visible' });
     await recoveryPage.close();
     assert.deepEqual(errors, []);
-    console.log('PASS: Rubika link/icon, text/image drag and selection guards, real mouse selection and editable forms; expanded CMS, project add/copy/delete/search/upload, hero/services/SEO edits, draft persistence, history/import restore, public rendering; graphic desktop/mobile layouts; username mapping/recovery requests; invalid/valid auth; server authorization; restored session; publish/failure/conflict; export; cloud homepage; password change and logout (mock Supabase API).');
+    console.log('PASS: secure bot pairing UI, private inbox/retry, notification and order delivery/error/idempotency; Rubika link/icon, text/image drag and selection guards, real mouse selection and editable forms; expanded CMS, project add/copy/delete/search/upload, hero/services/SEO edits, draft persistence, history/import restore, public rendering; graphic desktop/mobile layouts; username mapping/recovery requests; invalid/valid auth; server authorization; restored session; publish/failure/conflict; export; cloud homepage; password change and logout (mock Supabase API).');
     // Mobile header entry remains on-screen and animations respect user preferences.
     const mobileHome = await context.newPage();
     await mobileHome.setViewportSize({ width: 390, height: 844 });
