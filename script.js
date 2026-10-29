@@ -144,6 +144,7 @@ const DEFAULT_SITE = {
     address: "خراسان جنوبی، شهرستان خوسف، روستای تقاب",
     formspree: "https://formspree.io/f/mbdvppnp",
     platforms: [
+      { key: "rubika", label: "روبیکا", url: "https://rubika.ir/MIIM_DEV" },
       { key: "instagram", label: "اینستاگرام", url: "https://instagram.com/Resane_miim" },
       { key: "telegram", label: "تلگرام", url: "https://t.me/Resane_miim" },
       { key: "whatsapp", label: "واتساپ", url: "https://wa.me/989399887950" },
@@ -184,6 +185,7 @@ const DEFAULT_SITE = {
   };
 
   const SOCIAL_ICONS = {
+    rubika: '<img class="social-pill__icon" src="Image/rubika.png" width="22" height="22" alt="" aria-hidden="true" draggable="false">',
     instagram: '<svg viewBox="0 0 24 24" width="17" height="17"><rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="3.8" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></svg>',
     telegram: '<svg viewBox="0 0 24 24" width="17" height="17"><path d="M20.5 4.5 3.8 11.1c-.9.4-.9 1.1 0 1.4l4.2 1.3 1.6 5c.2.5.8.6 1.2.2l2.3-2.1 4.4 3.2c.6.4 1.3.1 1.5-.7l3-14c.2-.9-.6-1.4-1.5-.9Z" fill="currentColor"/></svg>',
     whatsapp: '<svg viewBox="0 0 24 24" width="17" height="17"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.9L3.5 20.5l4.2-1.1A8.5 8.5 0 1 0 12 3.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>',
@@ -520,6 +522,7 @@ const DEFAULT_SITE = {
         const icon = SOCIAL_ICONS[p.key] || SOCIAL_ICONS.link;
         let url = p.url || "";
         if (!url && p.key === "whatsapp") url = `https://wa.me/${waDigits}`;
+        url = projectSiteUrl(url);
         if (!url) return "";
         return `<a class="social-pill" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${icon}<span>${esc(p.label)}</span></a>`;
       }).join("");

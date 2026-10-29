@@ -39,3 +39,9 @@ test('schema strips imported HTML while preserving ordinary Persian quotation ma
   const input=snapshot();input.identity.heroTitle='<b>«استودیو»</b>';
   assert.equal(C.clean(input).identity.heroTitle,'b«استودیو»/b');
 });
+
+test('Rubika is a first-class editable social platform with the requested profile',()=>{
+  const input=snapshot();
+  const profile=C.clean(input).contact.platforms.find(p=>p.key==='rubika');
+  assert.deepEqual(profile,{key:'rubika',label:'روبیکا',url:'https://rubika.ir/MIIM_DEV'});
+});
