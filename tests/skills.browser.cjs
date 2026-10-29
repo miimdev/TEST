@@ -58,6 +58,8 @@ const baseline=JSON.parse(fs.readFileSync(path.join(__dirname,'../data.json'),'u
     assert.equal(await page.locator('#skills-replay').isVisible(),false);
     await page.evaluate(()=>window.MiimSkills.mount(Array.from({length:30},(_,i)=>({name:i?'مهارت بسیار طولانی برای بررسی چیدمان موبایل':'<script>alert(1)</script>',tag:'LongToolName'.repeat(8),percent:i?100:0}))));
     assert.equal(await page.getByRole('meter').count(),30);
+    assert.equal(await page.locator('#skills-card').getAttribute('data-cinematic'),null);
+    assert.equal(await page.locator('#skills-card').evaluate(el=>getComputedStyle(el).opacity),'1');
     assert.equal(await page.locator('#skills-list script').count(),0);
     assert.equal(await page.locator('#skills-card').evaluate(el=>el.scrollWidth<=el.clientWidth && el.getBoundingClientRect().width<=document.documentElement.clientWidth),true);
     await page.evaluate(()=>{const io=window.IntersectionObserver;delete window.IntersectionObserver;window.MiimSkills.mount([{name:'بدون Observer',percent:42,tag:''}]);window.IntersectionObserver=io;});
