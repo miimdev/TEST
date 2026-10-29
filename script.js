@@ -94,15 +94,6 @@ const DEFAULT_SITE = {
       description: "طراحی تجربه خرید مدرن و مینیمال برای فروشگاه آنلاین مد و استایل؛ با تمرکز بر فیلتر هوشمند سایز و رنگ، کارت محصول تعاملی و فرآیند تسویه‌حساب ۳ مرحله‌ای که نرخ تبدیل موبایل را به شکل چشمگیری افزایش داد.",
     },
     {
-      file: "proj-2.jpg",
-      title: "سوپراپلیکیشن مالی و موبایل‌بانک نوین",
-      tag: "رابط کاربری",
-      year: "۱۴۰۴",
-      client: "استارتاپ فین‌تک",
-      tools: "Figma · Design System",
-      description: "بازطراحی کامل رابط و تجربه کاربری اپلیکیشن مدیریت مالی شخصی؛ ساده‌سازی انتقال وجه، مدیریت هوشمند کارت‌ها و نمودارهای شفاف تراکنش با قابلیت تغییر تم.",
-    },
-    {
       file: "proj-3.jpg",
       title: "هویت بصری و بسته‌بندی «کافه رستا»",
       tag: "برندینگ",
@@ -119,15 +110,6 @@ const DEFAULT_SITE = {
       client: "آژانس دیجیتال ایده‌پردازان",
       tools: "Figma · CSS3 · Motion",
       description: "طراحی وب‌سایت تعاملی با اتمسفر تاریک استودیویی، تایپوگرافی جسورانه و انیمیشن‌های اسکرول نرم برای نمایش قدرتمند پروژه‌ها و جذب مشتریان سازمانی.",
-    },
-    {
-      file: "proj-5.jpg",
-      title: "داشبورد هوشمند تحلیل فروش و سفارشات",
-      tag: "رابط کاربری",
-      year: "۱۴۰۳",
-      client: "پلتفرم تجارت الکترونیک",
-      tools: "Figma · UI Kit",
-      description: "طراحی پنل مدیریتی داده‌محور برای رصد لحظه‌ای فروش، موجودی انبار، رفتار مشتریان و گزارش‌های مالی با چیدمان ماژولار و خوانایی بالا.",
     },
     {
       file: "proj-6.jpg",
@@ -219,7 +201,8 @@ const DEFAULT_SITE = {
     if (d.about && typeof d.about === "object") Object.assign(SITE.about, d.about);
     if (Array.isArray(d.services) && d.services.length) SITE.services = d.services;
     if (Array.isArray(d.skills) && d.skills.length) SITE.skills = d.skills;
-    if (Array.isArray(d.works)) SITE.works = d.works;
+    // نمونه‌کارهای رابط کاربری در داده‌های ذخیره‌شده‌ی قدیمی هم نمایش داده نشوند.
+    if (Array.isArray(d.works)) SITE.works = d.works.filter((w) => (w.tag || "").trim() !== "رابط کاربری");
     if (Array.isArray(d.process) && d.process.length) SITE.process = d.process;
     if (Array.isArray(d.testimonials)) SITE.testimonials = d.testimonials;
     if (d.contact && typeof d.contact === "object") Object.assign(SITE.contact, d.contact);
