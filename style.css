@@ -791,6 +791,8 @@ html.is-ready .hero__reveal {
   animation-delay: calc(var(--i, 0) * -1.5s);
 }
 .float-tool img { width: 100%; height: 100%; object-fit: contain; }
+.float-tool--web { color: var(--gold); }
+.float-tool--web svg { display: block; width: 100%; height: 100%; }
 .float-tool--1 { top: 8%; right: -6px; }
 .float-tool--2 { top: 15%; left: -10px; }
 .float-tool--3 { bottom: 26%; right: -12px; }
