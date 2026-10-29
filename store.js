@@ -83,7 +83,7 @@
     const expected = (remoteHash && /^[0-9a-f]{64}$/.test(remoteHash) && !lsGet(LS_CRED)) ? remoteHash : activeAuthHash();
     if (sha256(String(user).trim() + "\u0000" + pass) === expected) {
       lsDel(LS_FAIL);
-      lsSet(LS_AUTH, String(Date.now() + SESSION_MS));
+      if (!lsSet(LS_AUTH, String(Date.now() + SESSION_MS))) return { ok: false, error: "ذخیره‌سازی مرورگر در دسترس نیست. اجازهٔ ذخیره‌سازی را فعال کنید." };
       return { ok: true };
     }
     let f = {};
@@ -100,7 +100,7 @@
     if (u.length < 3) throw new Error("نام کاربری باید حداقل ۳ کاراکتر باشد.");
     if (p.length < 6) throw new Error("رمز عبور جدید باید حداقل ۶ کاراکتر باشد.");
     const h = sha256(u + "\u0000" + p);
-    lsSet(LS_CRED, h);
+    if (!lsSet(LS_CRED, h)) throw new Error("ذخیرهٔ مشخصات ورود ممکن نشد. اجازهٔ ذخیره‌سازی مرورگر را بررسی کنید.");
     return h;
   }
 
@@ -175,7 +175,7 @@
         try { parsed = new URL(url); } catch { fail("لینک سایت نمونه‌کار معتبر نیست."); }
         if (!["https:", "http:"].includes(parsed.protocol) || url.length > 2048) fail("لینک سایت نمونه‌کار باید با http:// یا https:// شروع شود.");
       }
-      return { file, tag: str(w.tag, 40) || "بدون دسته", description: str(w.description, 400), ...(w.url != null ? { url } : {}) };
+      return { file, title: str(w.title, 150), client: str(w.client, 120), year: str(w.year, 10), tools: str(w.tools, 200), tag: str(w.tag, 40) || "بدون دسته", description: str(w.description, 400), ...(w.url != null ? { url } : {}) };
     });
     if (!Array.isArray(body.skills) || body.skills.length > 30) fail("فهرست مهارت‌ها نامعتبر است.");
     const skills = body.skills.map((s) => {
@@ -183,7 +183,7 @@
       if (!name) fail("نام مهارت خالی است.");
       const percent = Math.max(0, Math.min(100, Math.round(Number(s.percent))));
       if (!Number.isFinite(percent)) fail("درصد مهارت نامعتبر است.");
-      return { name, percent };
+      return { name, percent, ...(s.tag != null ? { tag: str(s.tag, 80) } : {}) };
     });
     const c = body.contact || {};
     const phone = latin(c.phone).replace(/[^\d+]/g, "");

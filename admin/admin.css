@@ -1,0 +1,25 @@
+.admin-page { min-height: 100dvh; overflow: auto; background: radial-gradient(ellipse at top, #292012 0, var(--bg-0) 65%); color: var(--txt-1); }
+.admin-shell { width: min(1080px, 92%); margin-inline: auto; padding: 28px 0 64px; }
+.admin-header, .admin-toolbar, .admin-actions { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.admin-brand { display: flex; align-items: center; gap: 12px; color: var(--gold); font-size: 20px; font-weight: 800; }
+.admin-brand small { display: block; color: var(--txt-2); font-size: 12px; }
+.admin-notice { margin: 28px 0 16px; padding: 16px; border: 1px solid var(--stroke-hi); border-radius: 16px; color: var(--txt-2); line-height: 1.9; font-size: 13px; }
+.admin-card { margin-block: 24px; padding: clamp(20px, 4vw, 36px); border: 1px solid var(--stroke-hi); border-radius: 24px; background: var(--bg-1); }
+.login-card { max-width: 480px; margin: 32px auto; }
+.admin-page h1 { font-size: clamp(24px, 4vw, 32px); margin-block: 16px; font-family: var(--font-display); }
+.admin-page h2 { margin-bottom: 12px; font-size: 21px; }
+.admin-card p { color: var(--txt-2); line-height: 1.9; margin-bottom: 16px; }
+.admin-page label { display: grid; gap: 8px; font-size: 14px; color: var(--txt-2); margin-block: 16px; }
+.admin-page input, .admin-page textarea { width: 100%; min-width: 0; padding: 12px 14px; border: 1px solid var(--stroke-hi); border-radius: 12px; background: var(--bg-0); color: var(--txt-1); font: inherit; }
+.admin-page input:focus-visible, .admin-page textarea:focus-visible, .admin-page button:focus-visible, .admin-page a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.admin-page textarea { resize: vertical; min-height: 100px; }
+.password-field { display: flex; gap: 8px; align-items: center; }
+.password-field button { color: var(--gold); white-space: nowrap; padding: 8px; }
+.admin-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; }
+.work-editor { border: 1px solid var(--stroke-hi); border-radius: 16px; padding: 20px; margin-top: 20px; min-width: 0; }
+.work-editor legend { color: var(--gold); padding-inline: 8px; }
+.admin-actions { justify-content: flex-start; margin-bottom: 20px; }
+.admin-status, #save-status, #credentials-status { scroll-margin-top: 24px; line-height: 1.9; }
+.admin-page .admin-error, .admin-page [data-error="true"] { color: #ff9999; }
+@media (max-width: 600px) { .admin-grid { grid-template-columns: 1fr; } .admin-header .btn { padding: 10px 14px; } .admin-actions .btn { width: 100%; } .work-editor { padding: 12px; } }
+.password-field button { background: transparent; border: 1px solid var(--stroke-hi); border-radius: 10px; cursor: pointer; }
