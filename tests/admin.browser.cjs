@@ -81,6 +81,7 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     await page.reload();
     await page.locator('#dashboard').waitFor({ state: 'visible' });
     assert.equal(await page.locator('.work-editor').count(), 4);
+    assert.notEqual(await page.locator('#dashboard-title').evaluate(el=>getComputedStyle(el).userSelect),'none');
     if (process.env.SCREENSHOT_DIR) await page.screenshot({ path: path.join(process.env.SCREENSHOT_DIR, 'dashboard-desktop.png'), fullPage: true });
     await page.setViewportSize({ width: 390, height: 844 });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
