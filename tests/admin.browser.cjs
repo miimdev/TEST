@@ -205,6 +205,25 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     assert.match(await home.locator('#hero-title').textContent(),/تیتر آزمایشی/);
     assert.equal(await home.locator('.stage-card').count(),5);
     assert.match(await home.locator('.stage-card').last().locator('img').getAttribute('src'),/storage\/v1\/object\/public\/miim-media/);
+    // Rubika uses the supplied local icon and a safe new-tab link.
+    const rubika=home.locator('#social-links a[href="https://rubika.ir/MIIM_DEV"]');
+    assert.equal(await rubika.count(),1);
+    assert.match(await rubika.textContent(),/روبیکا/);
+    assert.equal(await rubika.getAttribute('target'),'_blank');
+    assert.match(await rubika.getAttribute('rel'),/noopener/);
+    assert.equal(await rubika.locator('img').getAttribute('src'),'Image/rubika.png');
+    await home.waitForFunction(()=>document.querySelector('#social-links img').complete && document.querySelector('#social-links img').naturalWidth>0);
+    assert.equal(await home.locator('#hero-photo').getAttribute('draggable'),'false');
+    for(const type of ['contextmenu','dragstart','selectstart']) {
+      assert.equal(await home.locator('#hero-photo').evaluate((el,type)=>!el.dispatchEvent(new Event(type,{bubbles:true,cancelable:true})),type),true);
+      assert.equal(await home.locator('.stage-card__overlay').first().evaluate((el,type)=>!el.dispatchEvent(new Event(type,{bubbles:true,cancelable:true})),type),true);
+      assert.equal(await home.locator('#order-form input:not([type=hidden])').first().evaluate((el,type)=>!el.dispatchEvent(new Event(type,{bubbles:true,cancelable:true})),type),false);
+    }
+    assert.equal(await home.locator('#c-mail-link').evaluate(el=>el.dispatchEvent(new Event('contextmenu',{bubbles:true,cancelable:true}))),true);
+    await home.locator('#order-form input[name=name]').fill('آزمایش فرم');
+    assert.equal(await home.locator('#order-form input[name=name]').inputValue(),'آزمایش فرم');
+    await home.evaluate(()=>{const img=document.createElement('img');img.id='dynamic-guard-test';document.body.append(img);});
+    await home.waitForFunction(()=>document.getElementById('dynamic-guard-test').draggable===false);
     const published=structuredClone(row.data);
     row.data.works[4].visible=false;
     await home.reload();await home.locator('.stage-card').first().waitFor();
@@ -247,7 +266,7 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     await recoveryPage.locator('#login-view').waitFor({ state: 'visible' });
     await recoveryPage.close();
     assert.deepEqual(errors, []);
-    console.log('PASS: expanded CMS, project add/copy/delete/search/upload, hero/services/SEO edits, draft persistence, history/import restore, public rendering; graphic desktop/mobile layouts; username mapping/recovery requests; invalid/valid auth; server authorization; restored session; publish/failure/conflict; export; cloud homepage; password change and logout (mock Supabase API).');
+    console.log('PASS: Rubika link/icon, image context/drag/selection guards and usable forms; expanded CMS, project add/copy/delete/search/upload, hero/services/SEO edits, draft persistence, history/import restore, public rendering; graphic desktop/mobile layouts; username mapping/recovery requests; invalid/valid auth; server authorization; restored session; publish/failure/conflict; export; cloud homepage; password change and logout (mock Supabase API).');
     // Mobile header entry remains on-screen and animations respect user preferences.
     const mobileHome = await context.newPage();
     await mobileHome.setViewportSize({ width: 390, height: 844 });

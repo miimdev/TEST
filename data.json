@@ -169,6 +169,7 @@
     "address": "خراسان جنوبی، شهرستان خوسف، روستای تقاب",
     "formspree": "https://formspree.io/f/mbdvppnp",
     "platforms": [
+      { "key": "rubika", "label": "روبیکا", "url": "https://rubika.ir/MIIM_DEV" },
       { "key": "instagram", "label": "اینستاگرام", "url": "https://instagram.com/Resane_miim" },
       { "key": "telegram", "label": "تلگرام", "url": "https://t.me/Resane_miim" },
       { "key": "whatsapp", "label": "واتساپ", "url": "https://wa.me/989399887950" }

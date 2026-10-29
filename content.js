@@ -6,7 +6,7 @@
 })(typeof window === 'object' ? window : globalThis, function () {
   'use strict';
   const MEDIA = 'https://jmpwryddrxmuwzmbmhsb.supabase.co/storage/v1/object/public/miim-media/';
-  const platforms = ['instagram','telegram','whatsapp','linkedin','behance','dribbble','x','youtube','link'];
+  const platforms = ['rubika','instagram','telegram','whatsapp','linkedin','behance','dribbble','x','youtube','link'];
   const bad = message => { throw new Error(message); };
   const object = value => value && typeof value === 'object' && !Array.isArray(value) ? value : bad('ساختار اطلاعات معتبر نیست.');
   function text(value, max = 300, required = false) {
