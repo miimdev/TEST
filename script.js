@@ -351,6 +351,11 @@ const DEFAULT_SITE = {
       const img = $(sel);
       if (img) img.src = logoUrl;
     });
+    const heroPhoto = $("#hero-photo");
+    if (heroPhoto) {
+      heroPhoto.src = imgSrc(id.photo || "My-photo.png");
+      heroPhoto.alt = `${id.name} — ${id.brand}`;
+    }
     document.title = SITE.seo?.title || `${id.brand} | ${id.name} — ${id.roleFa}`;
     const description = SITE.seo?.description || id.heroBio;
     $('meta[name="description"]')?.setAttribute('content', description);
@@ -1222,8 +1227,6 @@ const DEFAULT_SITE = {
   function initScrollytellingLoop() {
     const fill = $("#scroll-fill");
     const toTop = $("#to-top");
-    const hero = $("#hero");
-    const heroSticky = $("#hero-sticky");
     const marqueeTrack = $("#marquee-track");
 
     toTop?.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
@@ -1241,20 +1244,6 @@ const DEFAULT_SITE = {
       const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
       if (fill) fill.style.width = clamp((y / max) * 100, 0, 100).toFixed(2) + "%";
       if (toTop) toTop.classList.toggle("is-visible", y > 500);
-
-      // افکت دوربین سینمایی عقب‌نشینی هیرو هنگام بالا آمدن شیت محتوا (دسکتاپ)
-      if (heroSticky && window.innerWidth > 980 && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        const hh = hero.offsetHeight || window.innerHeight;
-        const p = clamp(y / (hh * 0.9), 0, 1);
-        const sc = 1 - p * 0.085;
-        const ty = p * -46;
-        const op = clamp(1 - p * 1.15, 0, 1);
-        heroSticky.style.transform = `translate3d(0, ${ty.toFixed(1)}px, 0) scale(${sc.toFixed(4)})`;
-        heroSticky.style.opacity = op.toFixed(3);
-      } else if (heroSticky) {
-        heroSticky.style.transform = "";
-        heroSticky.style.opacity = "";
-      }
 
       // حرکت پیوسته Marquee واکنش‌گرا به سرعت اسکرول
       if (marqueeTrack) {
