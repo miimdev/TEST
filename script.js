@@ -86,21 +86,13 @@ const DEFAULT_SITE = {
   works: [
     {
       file: "proj-1.jpg",
+      url: "https://miimdev.github.io/STYLE-LAND/",
       title: "فروشگاه آنلاین مد و پوشاک «استایلند»",
       tag: "طراحی وب",
       year: "۱۴۰۴",
       client: "برند پوشاک استایلند",
       tools: "Figma · HTML/CSS · JS",
       description: "طراحی تجربه خرید مدرن و مینیمال برای فروشگاه آنلاین مد و استایل؛ با تمرکز بر فیلتر هوشمند سایز و رنگ، کارت محصول تعاملی و فرآیند تسویه‌حساب ۳ مرحله‌ای که نرخ تبدیل موبایل را به شکل چشمگیری افزایش داد.",
-    },
-    {
-      file: "proj-2.jpg",
-      title: "سوپراپلیکیشن مالی و موبایل‌بانک نوین",
-      tag: "رابط کاربری",
-      year: "۱۴۰۴",
-      client: "استارتاپ فین‌تک",
-      tools: "Figma · Design System",
-      description: "بازطراحی کامل رابط و تجربه کاربری اپلیکیشن مدیریت مالی شخصی؛ ساده‌سازی انتقال وجه، مدیریت هوشمند کارت‌ها و نمودارهای شفاف تراکنش با قابلیت تغییر تم.",
     },
     {
       file: "proj-3.jpg",
@@ -113,21 +105,13 @@ const DEFAULT_SITE = {
     },
     {
       file: "proj-4.jpg",
+      url: "https://miimdev.github.io/IDEA/",
       title: "وب‌سایت استودیو خلاقیت «ایده‌پردازان»",
       tag: "طراحی وب",
       year: "۱۴۰۴",
       client: "آژانس دیجیتال ایده‌پردازان",
       tools: "Figma · CSS3 · Motion",
       description: "طراحی وب‌سایت تعاملی با اتمسفر تاریک استودیویی، تایپوگرافی جسورانه و انیمیشن‌های اسکرول نرم برای نمایش قدرتمند پروژه‌ها و جذب مشتریان سازمانی.",
-    },
-    {
-      file: "proj-5.jpg",
-      title: "داشبورد هوشمند تحلیل فروش و سفارشات",
-      tag: "رابط کاربری",
-      year: "۱۴۰۳",
-      client: "پلتفرم تجارت الکترونیک",
-      tools: "Figma · UI Kit",
-      description: "طراحی پنل مدیریتی داده‌محور برای رصد لحظه‌ای فروش، موجودی انبار، رفتار مشتریان و گزارش‌های مالی با چیدمان ماژولار و خوانایی بالا.",
     },
     {
       file: "proj-6.jpg",
@@ -219,7 +203,16 @@ const DEFAULT_SITE = {
     if (d.about && typeof d.about === "object") Object.assign(SITE.about, d.about);
     if (Array.isArray(d.services) && d.services.length) SITE.services = d.services;
     if (Array.isArray(d.skills) && d.skills.length) SITE.skills = d.skills;
-    if (Array.isArray(d.works)) SITE.works = d.works;
+    // نمونه‌کارهای رابط کاربری در داده‌های ذخیره‌شده‌ی قدیمی هم نمایش داده نشوند.
+    if (Array.isArray(d.works)) {
+      SITE.works = d.works
+        .filter((w) => (w.tag || "").trim() !== "رابط کاربری")
+        .map((w) => ({
+          ...w,
+          // نسخه‌های محلی قدیمی ممکن است هنوز فیلد لینک پروژه را نداشته باشند.
+          url: w.url ?? DEFAULT_SITE.works.find((item) => item.file === w.file)?.url ?? "",
+        }));
+    }
     if (Array.isArray(d.process) && d.process.length) SITE.process = d.process;
     if (Array.isArray(d.testimonials)) SITE.testimonials = d.testimonials;
     if (d.contact && typeof d.contact === "object") Object.assign(SITE.contact, d.contact);
@@ -1013,6 +1006,13 @@ const DEFAULT_SITE = {
     });
   }
 
+  function projectSiteUrl(value) {
+    try {
+      const url = new URL(value);
+      return ["https:", "http:"].includes(url.protocol) ? url.href : "";
+    } catch { return ""; }
+  }
+
   function fillCaseModal(idx) {
     const n = filteredWorks.length;
     if (!n) return;
@@ -1026,6 +1026,11 @@ const DEFAULT_SITE = {
     $("#case-year").textContent = fa(w.year || "۱۴۰۴");
     $("#case-tools").textContent = w.tools || "Design & Development";
     $("#case-desc").textContent = w.description || "";
+    const siteLink = $("#case-site-link");
+    const siteUrl = projectSiteUrl(w.url);
+    siteLink.hidden = !siteUrl;
+    if (siteUrl) siteLink.href = siteUrl;
+    else siteLink.removeAttribute("href");
     goStage(modalIdx);
   }
 

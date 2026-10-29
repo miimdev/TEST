@@ -169,7 +169,13 @@
       if (!/^[A-Za-z0-9._-]{1,120}$/.test(file) || !/\.(png|jpe?g|webp|gif)$/i.test(file)) fail("نام فایل یک اثر نامعتبر است.");
       if (seen.has(file)) fail("یک عکس بیش از یک‌بار در آثار آمده است.");
       seen.add(file);
-      return { file, tag: str(w.tag, 40) || "بدون دسته", description: str(w.description, 400) };
+      const url = String(w.url ?? "").trim();
+      if (url) {
+        let parsed;
+        try { parsed = new URL(url); } catch { fail("لینک سایت نمونه‌کار معتبر نیست."); }
+        if (!["https:", "http:"].includes(parsed.protocol) || url.length > 2048) fail("لینک سایت نمونه‌کار باید با http:// یا https:// شروع شود.");
+      }
+      return { file, tag: str(w.tag, 40) || "بدون دسته", description: str(w.description, 400), ...(w.url != null ? { url } : {}) };
     });
     if (!Array.isArray(body.skills) || body.skills.length > 30) fail("فهرست مهارت‌ها نامعتبر است.");
     const skills = body.skills.map((s) => {
