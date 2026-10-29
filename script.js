@@ -86,6 +86,7 @@ const DEFAULT_SITE = {
   works: [
     {
       file: "proj-1.jpg",
+      url: "https://miimdev.github.io/STYLE-LAND/",
       title: "فروشگاه آنلاین مد و پوشاک «استایلند»",
       tag: "طراحی وب",
       year: "۱۴۰۴",
@@ -104,6 +105,7 @@ const DEFAULT_SITE = {
     },
     {
       file: "proj-4.jpg",
+      url: "https://miimdev.github.io/IDEA/",
       title: "وب‌سایت استودیو خلاقیت «ایده‌پردازان»",
       tag: "طراحی وب",
       year: "۱۴۰۴",
@@ -202,7 +204,15 @@ const DEFAULT_SITE = {
     if (Array.isArray(d.services) && d.services.length) SITE.services = d.services;
     if (Array.isArray(d.skills) && d.skills.length) SITE.skills = d.skills;
     // نمونه‌کارهای رابط کاربری در داده‌های ذخیره‌شده‌ی قدیمی هم نمایش داده نشوند.
-    if (Array.isArray(d.works)) SITE.works = d.works.filter((w) => (w.tag || "").trim() !== "رابط کاربری");
+    if (Array.isArray(d.works)) {
+      SITE.works = d.works
+        .filter((w) => (w.tag || "").trim() !== "رابط کاربری")
+        .map((w) => ({
+          ...w,
+          // نسخه‌های محلی قدیمی ممکن است هنوز فیلد لینک پروژه را نداشته باشند.
+          url: w.url ?? DEFAULT_SITE.works.find((item) => item.file === w.file)?.url ?? "",
+        }));
+    }
     if (Array.isArray(d.process) && d.process.length) SITE.process = d.process;
     if (Array.isArray(d.testimonials)) SITE.testimonials = d.testimonials;
     if (d.contact && typeof d.contact === "object") Object.assign(SITE.contact, d.contact);
@@ -996,6 +1006,13 @@ const DEFAULT_SITE = {
     });
   }
 
+  function projectSiteUrl(value) {
+    try {
+      const url = new URL(value);
+      return ["https:", "http:"].includes(url.protocol) ? url.href : "";
+    } catch { return ""; }
+  }
+
   function fillCaseModal(idx) {
     const n = filteredWorks.length;
     if (!n) return;
@@ -1009,6 +1026,11 @@ const DEFAULT_SITE = {
     $("#case-year").textContent = fa(w.year || "۱۴۰۴");
     $("#case-tools").textContent = w.tools || "Design & Development";
     $("#case-desc").textContent = w.description || "";
+    const siteLink = $("#case-site-link");
+    const siteUrl = projectSiteUrl(w.url);
+    siteLink.hidden = !siteUrl;
+    if (siteUrl) siteLink.href = siteUrl;
+    else siteLink.removeAttribute("href");
     goStage(modalIdx);
   }
 

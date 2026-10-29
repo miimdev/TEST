@@ -80,6 +80,7 @@
   "works": [
     {
       "file": "proj-1.jpg",
+      "url": "https://miimdev.github.io/STYLE-LAND/",
       "title": "فروشگاه آنلاین مد و پوشاک «استایلند»",
       "tag": "طراحی وب",
       "year": "۱۴۰۴",
@@ -98,6 +99,7 @@
     },
     {
       "file": "proj-4.jpg",
+      "url": "https://miimdev.github.io/IDEA/",
       "title": "وب‌سایت استودیو خلاقیت «ایده‌پردازان»",
       "tag": "طراحی وب",
       "year": "۱۴۰۴",
