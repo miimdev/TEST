@@ -228,6 +228,15 @@ const DEFAULT_SITE = {
       clearTimeout(timer);
       if (r.ok) remote = await r.json();
     } catch {}
+    // Cloud is authoritative; old local drafts must never override published content.
+    if (window.MiimCloud) {
+      try {
+        const cloud = await window.MiimCloud.read(2500);
+        if (cloud?.data) { mergeData(remote); mergeData(cloud.data); return; }
+      } catch { /* Public site remains available from the checked-in snapshot. */ }
+      if (remote) { mergeData(remote); return; }
+      return;
+    }
     const loc = window.PF ? window.PF.readLocal() : null;
     const chosen = (loc && (!remote || String(loc.updatedAt || "") > String(remote.updatedAt || ""))) ? loc : remote;
     if (chosen) {
