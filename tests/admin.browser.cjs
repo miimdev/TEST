@@ -15,6 +15,8 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     let row = { data: structuredClone(snapshot), revision: 2, updated_at: new Date().toISOString() };
+    const history = [];
+    let uploads=0;
     let failWrite = false;
     let allowAdmin = true;
     let password = 'cloud-test-password';
@@ -26,7 +28,7 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     await context.route('https://jmpwryddrxmuwzmbmhsb.supabase.co/**', async route => {
       const request = route.request();
       const url = new URL(request.url());
-      const body = request.postDataJSON();
+      const body = request.headers()['content-type']?.includes('application/json') ? request.postDataJSON() : null;
       const send = (json, status = 200) => route.fulfill({ status, json });
       if (url.pathname === '/auth/v1/token') {
         if (['refresh_token', 'pkce'].includes(url.searchParams.get('grant_type'))) return send(session());
@@ -44,10 +46,17 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
         if (request.method() === 'PATCH') {
           if (failWrite) return send({ message: 'permission denied', code: '42501' }, 403);
           if (url.searchParams.get('revision') !== 'eq.' + row.revision) return send(null);
+          history.unshift({data:structuredClone(row.data),revision:row.revision,saved_at:row.updated_at});
           row = { data: { ...body.data, updatedAt: new Date().toISOString() }, revision: row.revision + 1, updated_at: new Date().toISOString() };
         }
         return send(row);
       }
+      if (url.pathname === '/rest/v1/miim_revisions') {
+        const revision=url.searchParams.get('revision');
+        return send(revision?history.find(r=>'eq.'+r.revision===revision):history.map(({data,...r})=>r));
+      }
+      if (url.pathname.startsWith('/storage/v1/object/miim-media/uploads/') && request.method()==='POST') { uploads++;return send({Key:url.pathname.split('/object/')[1]}); }
+      if (url.pathname.startsWith('/storage/v1/object/public/miim-media/')) return route.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ8sAAAAASUVORK5CYII=','base64')});
       throw new Error('Unexpected mock request ' + request.url());
     });
     await page.goto(base + '/');
@@ -85,6 +94,87 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     assert.ok(row.data.contact.formspree);
     assert.equal(row.data.skills[0].tag, 'Figma');
     assert.equal('authHash' in row.data, false);
+    // Expanded CMS: structural project operations must preserve all in-progress edits.
+    await page.locator('#project-search').fill('استایلند');
+    assert.equal(await page.locator('.work-editor:visible').count(),1);
+    await page.locator('#project-search').fill('');
+    await page.locator('.work-editor').first().getByRole('button',{name:'کپی',exact:true}).click();
+    assert.equal(await page.locator('.work-editor').count(),5);
+    assert.equal(await page.locator('.work-editor').nth(1).locator('[data-key=visible]').isChecked(),false);
+    page.once('dialog',d=>d.accept());
+    await page.locator('.work-editor').nth(1).getByRole('button',{name:'حذف',exact:true}).click();
+    assert.equal(await page.locator('.work-editor').count(),4);
+    await page.locator('#add-project').click();
+    const added=page.locator('.work-editor').last();
+    await added.locator('[data-key=title]').fill('پروژهٔ جدید آزمایشی');
+    await added.locator('[data-key=tag]').fill('گرافیک');
+    const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ8sAAAAASUVORK5CYII=','base64');
+    await added.locator('input[type=file]').setInputFiles({name:'test.png',mimeType:'image/png',buffer:png});
+    await page.waitForFunction(()=>!document.getElementById('publish').disabled);
+    assert.equal(uploads,1);
+    assert.match(await page.locator('.work-editor').last().locator('.project-cover img').getAttribute('src'),/storage\/v1\/object\/public\/miim-media\/uploads/);
+    // Newly added projects are hidden until the manager explicitly enables them.
+    assert.equal(await page.locator('.work-editor').last().locator('[data-key=visible]').isChecked(),false);
+    await page.locator('.work-editor').last().locator('[data-key=visible]').check();
+    await page.locator('#identity-section > summary').click();
+    await page.locator('#identity-section [data-cms-key=heroTitle]').fill('تیتر آزمایشی استودیو');
+    await page.locator('#identity-section [data-cms-key=heroAccent]').fill('استودیو');
+    await page.locator('#services-section > summary').click();
+    await page.locator('#services-section').getByRole('button',{name:'＋ افزودن ردیف',exact:true}).click();
+    await page.locator('#services-section .cms-row').last().locator('[data-cms-key=title]').fill('خدمت جدید آزمایشی');
+    await page.locator('#services-section .cms-row').last().locator('[data-cms-key=deliverables]').fill('خروجی اول\nخروجی دوم');
+    await page.locator('#seo-section > summary').click();
+    await page.locator('#seo-section [data-cms-key=title]').fill('عنوان سئوی آزمایشی');
+    await page.locator('#seo-section [data-cms-key=description]').fill('توضیح متای آزمایشی');
+    await page.locator('#publish').click();
+    await page.waitForFunction(()=>!document.getElementById('publish').disabled);
+    assert.equal(row.data.works.length,5);
+    assert.equal(row.data.identity.heroTitle,'تیتر آزمایشی استودیو');
+    assert.equal(row.data.services.at(-1).title,'خدمت جدید آزمایشی');
+    assert.deepEqual(row.data.services.at(-1).deliverables,['خروجی اول','خروجی دوم']);
+    assert.equal(row.data.seo.title,'عنوان سئوی آزمایشی');
+    // Reorder projects and collection rows, then delete a temporary row.
+    await page.locator('.work-editor').last().getByRole('button',{name:'↑',exact:true}).click();
+    assert.equal(await page.locator('.work-editor').nth(3).locator('[data-key=title]').inputValue(),'پروژهٔ جدید آزمایشی');
+    await page.locator('.work-editor').nth(3).getByRole('button',{name:'↓',exact:true}).click();
+    const movedService=(await page.locator('#services-section .cms-row').count())-2;
+    await page.locator('#services-section .cms-row').last().getByRole('button',{name:'↑',exact:true}).click();
+    assert.equal(await page.locator('#services-section .cms-row').nth(movedService).locator('[data-cms-key=title]').inputValue(),'خدمت جدید آزمایشی');
+    await page.locator('#services-section .cms-row').nth(movedService).getByRole('button',{name:'↓',exact:true}).click();
+    await page.locator('#services-section').getByRole('button',{name:'＋ افزودن ردیف',exact:true}).click();
+    page.once('dialog',d=>d.accept());await page.locator('#services-section .cms-row').last().getByRole('button',{name:'حذف',exact:true}).click();
+    // Auto-saved draft is offered after reload, never silently published.
+    await page.locator('.work-editor [data-key=title]').first().fill('پیش‌نویس بازیابی‌شده');
+    await page.waitForFunction(()=>Object.keys(localStorage).filter(k=>k.startsWith('miim:draft:')).some(k=>JSON.parse(localStorage.getItem(k)).data.works[0].title==='پیش‌نویس بازیابی‌شده'));
+    page.once('dialog',d=>d.accept());
+    await page.reload();await page.locator('#dashboard').waitFor({state:'visible'});
+    await page.locator('#draft-banner').waitFor({state:'visible'});
+    page.once('dialog',d=>d.accept());await page.locator('#restore-draft').click();
+    assert.equal(await page.locator('.work-editor [data-key=title]').first().inputValue(),'پیش‌نویس بازیابی‌شده');
+    assert.equal(row.data.works[0].title,'عنوان آزمایشی سایت');
+    page.once('dialog',d=>d.accept());await page.locator('#refresh-content').click();
+    await page.waitForFunction(()=>!document.getElementById('publish').disabled && document.getElementById('save-status').textContent.includes('آخرین نسخه'));
+    // Restore history only into a draft, and do not change the cloud until Publish.
+    await page.locator('#load-history').click();
+    await page.locator('.history-row').first().waitFor({state:'visible'});
+    const cloudRevision=row.revision;
+    page.once('dialog',d=>d.accept());await page.locator('.history-row').first().locator('button').click();
+    await page.waitForFunction(()=>document.getElementById('backup-status').textContent.includes('فرم بازگردانده'));
+    assert.equal(row.revision,cloudRevision);
+    page.once('dialog',d=>d.accept());await page.locator('#refresh-content').click();
+    await page.waitForFunction(()=>!document.getElementById('publish').disabled && document.getElementById('save-status').textContent.includes('آخرین نسخه'));
+    await page.locator('#import-file').setInputFiles({name:'invalid.json',mimeType:'application/json',buffer:Buffer.from('{invalid json')});
+    await page.waitForFunction(()=>document.getElementById('backup-status').dataset.error==='true');
+    assert.equal(row.revision,cloudRevision);
+    const imported=structuredClone(snapshot);imported.identity.brand='برند فایل پشتیبان';
+    page.once('dialog',d=>d.accept());
+    await page.locator('#import-file').setInputFiles({name:'backup.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(imported))});
+    await page.waitForFunction(()=>document.getElementById('backup-status').textContent.includes('فایل به پیش‌نویس'));
+    assert.equal(await page.locator('#identity-section [data-cms-key=brand]').inputValue(),'برند فایل پشتیبان');
+    assert.notEqual(row.data.identity.brand,imported.identity.brand);
+    page.once('dialog',d=>d.accept());await page.locator('#refresh-content').click();
+    await page.waitForFunction(()=>!document.getElementById('publish').disabled && document.getElementById('save-status').textContent.includes('آخرین نسخه'));
+
     // Failed requests retain the draft and cannot show a successful publish.
     failWrite = true;
     await page.locator('.work-editor [data-key=title]').first().fill('پیش‌نویس ذخیره‌نشده');
@@ -109,6 +199,20 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     const home = await context.newPage();
     await home.goto(base + '/');
     await home.waitForFunction(() => document.getElementById('stage-active-title').textContent === 'عنوان آزمایشی سایت');
+    assert.equal(await home.title(),'عنوان سئوی آزمایشی');
+    assert.equal(await home.locator('meta[name=description]').getAttribute('content'),'توضیح متای آزمایشی');
+    assert.match(await home.locator('#service-chips').textContent(),/خدمت جدید آزمایشی/);
+    assert.match(await home.locator('#hero-title').textContent(),/تیتر آزمایشی/);
+    assert.equal(await home.locator('.stage-card').count(),5);
+    assert.match(await home.locator('.stage-card').last().locator('img').getAttribute('src'),/storage\/v1\/object\/public\/miim-media/);
+    const published=structuredClone(row.data);
+    row.data.works[4].visible=false;
+    await home.reload();await home.locator('.stage-card').first().waitFor();
+    await home.waitForFunction(()=>document.querySelectorAll('.stage-card').length===4);
+    row.data.works=[];
+    await home.reload();await home.locator('#works-empty').waitFor({state:'visible'});
+    assert.equal(await home.locator('.stage-card').count(),0);
+    row.data=published;
     await home.close();
     await page.locator('#current-password').fill(password);
     await page.locator('#new-password').fill('updated-cloud-password');
@@ -143,7 +247,7 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     await recoveryPage.locator('#login-view').waitFor({ state: 'visible' });
     await recoveryPage.close();
     assert.deepEqual(errors, []);
-    console.log('PASS: graphic desktop/mobile layouts; username mapping/recovery requests; invalid/valid auth; server authorization; restored session; publish/failure/conflict; export; cloud homepage; password change and logout (mock Supabase API).');
+    console.log('PASS: expanded CMS, project add/copy/delete/search/upload, hero/services/SEO edits, draft persistence, history/import restore, public rendering; graphic desktop/mobile layouts; username mapping/recovery requests; invalid/valid auth; server authorization; restored session; publish/failure/conflict; export; cloud homepage; password change and logout (mock Supabase API).');
     // Mobile header entry remains on-screen and animations respect user preferences.
     const mobileHome = await context.newPage();
     await mobileHome.setViewportSize({ width: 390, height: 844 });
