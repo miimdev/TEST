@@ -171,6 +171,7 @@ const DEFAULT_SITE = {
 
   const imgSrc = (file) => {
     if (!file) return "";
+    if (window.MiimContent && file.startsWith(window.MiimContent.MEDIA)) { try { return window.MiimContent.image(file); } catch { return ""; } }
     if (window.PF && window.PF.blobs && window.PF.blobs[file]) return window.PF.blobs[file];
     return (SITE.imagesPath || "Image/") + file.split("/").map(encodeURIComponent).join("/");
   };
@@ -199,24 +200,25 @@ const DEFAULT_SITE = {
     if (!d || typeof d !== "object") return;
     if (d.theme === "light" || d.theme === "dark") SITE.theme = d.theme;
     if (d.identity && typeof d.identity === "object") Object.assign(SITE.identity, d.identity);
-    if (Array.isArray(d.stats) && d.stats.length) SITE.stats = d.stats;
+    if (Array.isArray(d.stats)) SITE.stats = d.stats;
     if (d.about && typeof d.about === "object") Object.assign(SITE.about, d.about);
-    if (Array.isArray(d.services) && d.services.length) SITE.services = d.services;
-    if (Array.isArray(d.skills) && d.skills.length) SITE.skills = d.skills;
+    if (Array.isArray(d.services)) SITE.services = d.services;
+    if (Array.isArray(d.skills)) SITE.skills = d.skills;
     // نمونه‌کارهای رابط کاربری در داده‌های ذخیره‌شده‌ی قدیمی هم نمایش داده نشوند.
     if (Array.isArray(d.works)) {
       SITE.works = d.works
-        .filter((w) => (w.tag || "").trim() !== "رابط کاربری")
+        .filter((w) => w.visible !== false && (w.tag || "").trim() !== "رابط کاربری")
         .map((w) => ({
           ...w,
           // نسخه‌های محلی قدیمی ممکن است هنوز فیلد لینک پروژه را نداشته باشند.
           url: w.url ?? DEFAULT_SITE.works.find((item) => item.file === w.file)?.url ?? "",
         }));
     }
-    if (Array.isArray(d.process) && d.process.length) SITE.process = d.process;
+    if (Array.isArray(d.process)) SITE.process = d.process;
     if (Array.isArray(d.testimonials)) SITE.testimonials = d.testimonials;
     if (d.contact && typeof d.contact === "object") Object.assign(SITE.contact, d.contact);
     if (d.footer && typeof d.footer === "object") Object.assign(SITE.footer, d.footer);
+    if (d.seo && typeof d.seo === "object") SITE.seo = d.seo;
   }
 
   async function loadStudioData() {
@@ -352,7 +354,11 @@ const DEFAULT_SITE = {
       heroPhoto.src = imgSrc(id.photo || "My-photo.png");
       heroPhoto.alt = `${id.name} — ${id.brand}`;
     }
-    document.title = `${id.brand} | ${id.name} — ${id.roleFa}`;
+    document.title = SITE.seo?.title || `${id.brand} | ${id.name} — ${id.roleFa}`;
+    const description = SITE.seo?.description || id.heroBio;
+    $('meta[name="description"]')?.setAttribute('content', description);
+    $('meta[property="og:description"]')?.setAttribute('content', description);
+    $('meta[property="og:title"]')?.setAttribute('content', document.title);
 
     const strip = $("#stats-strip");
     if (strip) {
@@ -424,6 +430,14 @@ const DEFAULT_SITE = {
         </button>
       </article>`).join("");
 
+    const chips = $("#service-chips");
+    if (chips) {
+      const titles = SITE.services.length ? SITE.services.map(s => s.title) : ['مشاوره و راهنمایی'];
+      const selected = $("#selected-service").value;
+      const active = titles.includes(selected) ? selected : titles[0];
+      chips.innerHTML = titles.map(title => `<button type="button" class="choice-chip ${title === active ? 'is-selected' : ''}" data-val="${esc(title)}">${esc(title)}</button>`).join('');
+      $("#selected-service").value = active;
+    }
     $$("[data-select-service]", grid).forEach((btn) => {
       btn.addEventListener("click", () => preselectServiceAndScroll(btn.dataset.selectService));
     });
@@ -494,7 +508,7 @@ const DEFAULT_SITE = {
     }
 
     const orderForm = $("#order-form");
-    if (orderForm && c.formspree) orderForm.action = c.formspree;
+    if (orderForm) orderForm.action = c.formspree || "#";
 
     const waDigits = intl.replace("+", "");
     const quickWa = $("#quick-wa");
@@ -754,6 +768,7 @@ const DEFAULT_SITE = {
   }
 
   function renderFilterTabs() {
+    if (activeCategory !== "ALL" && !SITE.works.some(w => (w.tag || "").trim() === activeCategory)) activeCategory = "ALL";
     const wrap = $("#filter-tabs");
     if (!wrap) return;
     const counts = new Map();
@@ -863,8 +878,11 @@ const DEFAULT_SITE = {
     const bentoWrap = $("#works-bento");
     const vp = $("#stage-viewport");
 
-    stageWrap.hidden = viewMode !== "stage";
-    bentoWrap.hidden = viewMode !== "grid";
+    stageWrap.hidden = viewMode !== "stage" || !filteredWorks.length;
+    bentoWrap.hidden = viewMode !== "grid" || !filteredWorks.length;
+    let empty = $("#works-empty");
+    if (!empty) { empty = document.createElement('p'); empty.id='works-empty';empty.style.cssText='text-align:center;padding:40px;color:var(--txt-3)';empty.textContent='هنوز نمونه‌کاری در این دسته منتشر نشده است.';stageWrap.before(empty); }
+    empty.hidden = filteredWorks.length > 0;
 
     $$(".stage-card", vp).forEach((el) => el.remove());
     stageCards = filteredWorks.map((w, i) => {
@@ -1065,9 +1083,8 @@ const DEFAULT_SITE = {
     const chips = $$("#service-chips .choice-chip");
     const kw = (keyword || "").trim();
     let matched = chips.find((c) => c.dataset.val.includes(kw) || kw.includes(c.dataset.val.split(" ")[0]));
-    if (!matched && kw.includes("وب")) matched = chips[0];
-    if (!matched && kw.includes("رابط")) matched = chips[1];
-    if (!matched && kw.includes("برند")) matched = chips[2];
+    if (!matched && kw.includes("وب")) matched = chips.find(c => /وب|سایت/.test(c.dataset.val));
+    if (!matched && /برند|گرافیک/.test(kw)) matched = chips.find(c => /برند|گرافیک|بصری/.test(c.dataset.val));
     if (matched) {
       chips.forEach((c) => c.classList.toggle("is-selected", c === matched));
       $("#selected-service").value = matched.dataset.val;
@@ -1118,6 +1135,7 @@ const DEFAULT_SITE = {
       status.className = "order-status";
       status.textContent = "";
 
+      if (!SITE.contact.formspree) { status.className = "order-status is-err"; status.textContent = "فرم آنلاین فعلاً غیرفعال است؛ از واتساپ یا تماس استفاده کنید."; return; }
       let ok = true;
       $$("[required]", form).forEach((inp) => {
         const wrap = inp.closest(".field");
