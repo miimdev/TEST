@@ -20,7 +20,7 @@
   </script>
   <link rel="preload" href="font/Doran.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="font/Vazirmatn-Variable.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="style.css?v=15572bad0425">
+  <link rel="stylesheet" href="style.css?v=1161b4793865">
 </head>
 <body class="is-loading">
 
@@ -86,7 +86,7 @@
           <svg data-icon="moon" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20.2 14.6A8.2 8.2 0 0 1 9.4 3.8a8.4 8.4 0 1 0 10.8 10.8Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
         </button>
 
-        <a class="nav__tool nav__admin" href="admin/?v=5f24c03c4f44" data-magnetic title="اتاق فرمان (پنل مدیریت)" aria-label="ورود به اتاق فرمان">
+        <a class="nav__tool nav__admin" href="admin/?v=8ad248306c55" data-magnetic title="اتاق فرمان (پنل مدیریت)" aria-label="ورود به اتاق فرمان">
           <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><rect x="5" y="11" width="14" height="9.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
           <span>ورود مدیر</span>
         </a>
@@ -132,30 +132,21 @@
             <div class="stats-strip hero__reveal" style="--hd:0.54s" id="stats-strip"></div>
           </div>
 
-          <!-- A kinetic creative engine: no portrait, no remote assets or WebGL dependency. -->
-          <div class="hero__stage hero__reveal" style="--hd:0.18s" id="hero-stage">
-            <div class="reactor-topline"><span><i></i> MIIM / CREATIVE ENGINE</span><span>EST. IN IMAGINATION</span></div>
-            <div class="reactor-art" aria-hidden="true">
-              <div class="reactor-grid"></div><div class="reactor-aura"></div>
-              <canvas id="hero-reactor-canvas"></canvas>
-              <div class="reactor-space" id="reactor-space">
-                <div class="reactor-axis reactor-axis--a"><span></span></div><div class="reactor-axis reactor-axis--b"><span></span></div><div class="reactor-axis reactor-axis--c"><span></span></div>
-                <div class="reactor-nucleus"><div class="reactor-prism">
-                  <div class="reactor-face reactor-face--front"><svg viewBox="0 0 64 64" fill="none"><path d="M12 46V18l20 20 20-20v28M12 18l20 12 20-12M22 46V34l10 10 10-10v12" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg><span>MIIM</span></div>
-                  <div class="reactor-face reactor-face--back"></div><div class="reactor-face reactor-face--left"></div><div class="reactor-face reactor-face--right"></div><div class="reactor-face reactor-face--top"></div><div class="reactor-face reactor-face--bottom"></div>
-                </div></div>
-                <div class="reactor-window reactor-window--web"><div class="reactor-window__bar"><span><i></i><i></i><i></i></span><b>studio.design</b><em>↗</em></div><div class="reactor-web"><span class="reactor-web__eyebrow"></span><strong>MAKE<br>IT MATTER.</strong><div class="reactor-web__layout"><span></span><span></span><span></span></div><i></i></div><span class="reactor-window__caption">01 / WEB EXPERIENCES</span></div>
-                <div class="reactor-window reactor-window--code"><div class="reactor-window__bar"><span><i></i><i></i><i></i></span><b>imagination.js</b></div><div class="reactor-code"><span><i>const</i> idea = <b>imagine</b>();</span><span><i>await</i> <b>craft</b>(idea);</span><span><b>launch</b>();<em>▍</em></span></div><span class="reactor-window__caption">02 / BUILT WITH PRECISION</span></div>
-                <div class="reactor-vector"><svg viewBox="0 0 160 90" fill="none"><path class="reactor-vector__path" d="M12 72C35-12 119-8 148 68" stroke="currentColor" stroke-width="2"/><path d="M12 72 35 12m90-2 23 58" stroke="currentColor" stroke-opacity=".3"/><g fill="var(--bg-1)" stroke="currentColor"><rect x="8" y="68" width="8" height="8"/><rect x="144" y="64" width="8" height="8"/><rect x="31" y="8" width="7" height="7"/><rect x="121" y="6" width="7" height="7"/></g></svg><span>03 / BRAND & MOTION</span></div>
-                <span class="reactor-satellite reactor-satellite--a">✦</span><span class="reactor-satellite reactor-satellite--b">&lt;/&gt;</span>
-              </div>
-              <div class="reactor-annotation reactor-annotation--left"><span>IDEA</span><i></i><span>CRAFT</span><i></i><span>IMPACT</span></div>
-              <span class="reactor-coordinate">35° CREATIVE / ∞ POSSIBILITIES</span>
+          <!-- Flat editorial portrait: the original photo stays untouched. -->
+          <figure class="hero__stage hero__reveal" style="--hd:0.18s" id="hero-stage" aria-labelledby="poster-name">
+            <div class="portrait-poster" id="portrait-poster">
+              <div class="poster-paper" aria-hidden="true"><span class="poster-ink"></span><span class="poster-rule poster-rule--a"></span><span class="poster-rule poster-rule--b"></span><span class="poster-grain"></span></div>
+              <div class="poster-masthead" aria-hidden="true"><span>MIIM® — INDEPENDENT STUDIO</span><span>DESIGN / DEVELOP</span></div>
+              <div class="poster-type" aria-hidden="true">MIIM<span>MAKE IT<br>MEANINGFUL.</span></div>
+              <div class="poster-photo-wrap"><img id="hero-photo" class="poster-photo" src="Image/My-photo.png" alt="مجتبی میدانی — طراح گرافیک و وب" width="960" height="1190" fetchpriority="high" draggable="false"></div>
+              <span class="poster-side-note" aria-hidden="true">A HUMAN BEHIND EVERY GREAT IDEA.</span>
+              <div class="poster-stamp" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><path d="M20 3v34M3 20h34M8 8l24 24M8 32 32 8" stroke="currentColor" stroke-width="2"/></svg><span>IDEAS<br>IN MOTION</span></div>
+              <div class="poster-nameplate"><span class="poster-nameplate__line" aria-hidden="true"></span><span>طراح پشت ایده‌ها</span><strong id="poster-name" data-bind="name">مجتبی میدانی</strong><small dir="ltr">DESIGN IS PERSONAL.</small></div>
+              <span class="poster-corner poster-corner--a" aria-hidden="true"></span><span class="poster-corner poster-corner--b" aria-hidden="true"></span>
             </div>
-            <div class="reactor-caption"><div><span class="reactor-caption__eyebrow">از جرقهٔ اول تا اثر ماندگار</span><strong>ایده‌ها اینجا شکل می‌گیرند.</strong></div><button id="hero-spark" type="button" aria-label="ایجاد جرقهٔ نور در صحنه">جرقه بزن <span aria-hidden="true">↗</span></button></div>
-            <div class="reactor-identity"><div class="reactor-identity__brand"><img src="Image/logo.png" alt="" width="32" height="32" id="badge-logo"><div><b data-bind="brand">رسانه میم</b><span data-bind="name">مجتبی میدانی</span></div></div><span class="reactor-availability" id="availability-pill" data-bind="availability">آماده پذیرش پروژه جدید</span></div>
-            <div class="reactor-controls"><span>WEB · BRAND · MOTION</span><button id="hero-motion-toggle" type="button" aria-pressed="false"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M5 3v10M11 3v10" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>توقف انیمیشن</span></button></div>
-          </div>
+            <figcaption class="poster-caption"><div class="poster-brand"><img src="Image/logo.png" alt="" width="30" height="30" id="badge-logo"><b data-bind="brand">رسانه میم</b></div><span id="availability-pill" class="poster-availability" data-bind="availability">آماده پذیرش پروژه جدید</span></figcaption>
+            <div class="poster-controls"><span aria-hidden="true">GRAPHIC DESIGN × WEB DEVELOPMENT</span><div><button id="hero-replay" type="button" aria-label="بازپخش ورود عکس و عناصر گرافیکی">بازپخش <span aria-hidden="true">↻</span></button><button id="hero-motion-toggle" type="button" aria-pressed="false"><span>توقف حرکت</span></button></div></div>
+          </figure>
         </div>
 
         <a class="scroll-cue" href="#about" aria-label="اسکرول به پایین">
@@ -518,9 +509,9 @@
   <script src="vendor/miim-cloud.js?v=992e807fee2f" defer></script>
   <script src="content.js?v=177488c22bf1" defer></script>
   <script src="store.js?v=15ceb76922e5" defer></script>
-  <script src="content-guard.js?v=4183c65acd4c" defer></script>
-  <script src="hero.js?v=b0c798b8e638" defer></script>
+  <script src="content-guard.js?v=056a0ff9b046" defer></script>
+  <script src="hero.js?v=dec33d6e6f17" defer></script>
   <script src="skills.js?v=e5ca2dd92060" defer></script>
-  <script src="script.js?v=15b5f380fb8c" defer></script>
+  <script src="script.js?v=74d88e6b9a58" defer></script>
 </body>
 </html>
