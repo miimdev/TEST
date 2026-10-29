@@ -1,59 +1,79 @@
 <!doctype html>
-<html lang="fa" dir="rtl" data-theme="dark">
+<html lang="fa" dir="rtl" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#234d48">
   <title>اتاق فرمان | رسانه میم</title>
   <link rel="icon" href="../Image/logo.png">
   <link rel="stylesheet" href="../style.css">
   <link rel="stylesheet" href="admin.css">
+  <script src="../vendor/miim-cloud.js" defer></script>
   <script src="../store.js" defer></script>
   <script src="admin.js" defer></script>
 </head>
 <body class="admin-page">
-  <main class="admin-shell">
-    <header class="admin-header">
-      <a class="admin-brand" href="../"><img src="../Image/logo.png" alt="" width="44" height="44"><span>رسانه میم <small>اتاق فرمان</small></span></a>
-      <a class="btn btn--ghost" href="../">بازگشت به سایت</a>
-    </header>
-    <p class="admin-notice">این پنل برای مدیریت محلی سایت استاتیک است، نه احراز هویت امن سمت سرور. ذخیره فقط در همین مرورگر اعمال می‌شود؛ برای نمایش عمومی، خروجی را جایگزین فایل <bdi>data.json</bdi> در ریپوزیتوری کنید.</p>
-    <p id="status" class="admin-status" role="status" aria-live="polite">در حال دریافت اطلاعات…</p>
-    <button id="retry" class="btn btn--ghost" type="button" hidden>تلاش مجدد</button>
-
-    <section id="login-view" class="admin-card login-card" aria-labelledby="login-title" hidden>
-      <span class="eyebrow-pill">مدیریت استودیو</span>
-      <h1 id="login-title">ورود به اتاق فرمان</h1>
-      <p>با مشخصات ورود پنل، نمونه‌کارها و اطلاعات تماس را مدیریت کنید.</p>
-      <form id="login-form">
-        <label>نام کاربری<input id="username" name="username" autocomplete="username" dir="ltr" required></label>
-        <label>رمز عبور<span class="password-field"><input id="password" name="password" type="password" autocomplete="current-password" dir="ltr" required><button id="toggle-password" type="button" aria-controls="password" aria-pressed="false">نمایش رمز</button></span></label>
-        <p id="login-error" class="admin-error" role="alert"></p>
-        <button class="btn btn--gold" type="submit">ورود به اتاق فرمان</button>
-      </form>
+  <div class="page-grain" aria-hidden="true"></div>
+  <header class="public-header">
+    <a class="brand" href="../"><img src="../Image/logo.png" alt="" width="46" height="46"><span>رسانه میم<small>استودیو خلاقیت دیجیتال</small></span></a>
+    <a class="back-link" href="../">بازگشت به وب‌سایت <span aria-hidden="true">↗</span></a>
+  </header>
+  <main>
+    <div id="connection-state" class="connection-state"><span class="status-dot"></span><p id="status" role="status" aria-live="polite">در حال برقراری ارتباط…</p><button id="retry" class="text-button" type="button" hidden>تلاش مجدد ↻</button></div>
+    <section id="login-view" class="login-layout" aria-labelledby="login-title" hidden>
+      <div class="login-form-panel">
+        <div class="login-topline"><span class="eyebrow">MIIM / STUDIO ACCESS</span><span class="mini-badge">ورود مدیر</span></div>
+        <div class="login-heading"><div class="lock-symbol" aria-hidden="true">⌘</div><h1 id="login-title">به فضای خلاقیت<br>خودت خوش آمدی<span>.</span></h1><p id="login-description">از اینجا، داستان برندت را مدیریت کن.<br>برای ورود به اتاق فرمان، مشخصات حسابت را وارد کن.</p></div>
+        <form id="login-form">
+          <label for="username">آدرس ایمیل <span class="label-en">EMAIL ADDRESS</span></label>
+          <div class="input-wrap"><span aria-hidden="true">@</span><input id="username" name="email" type="email" autocomplete="username" dir="ltr" placeholder="you@example.com" required></div>
+          <div class="password-label"><label for="password">رمز عبور <span class="label-en">PASSWORD</span></label><button id="forgot-password" class="text-button" type="button">رمز را فراموش کرده‌ام</button></div>
+          <div class="input-wrap"><button id="toggle-password" type="button" aria-controls="password" aria-pressed="false" aria-label="نمایش رمز عبور"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button><input id="password" name="password" type="password" autocomplete="current-password" dir="ltr" placeholder="رمز عبور شما" required></div>
+          <p id="login-error" class="form-feedback" role="alert"></p>
+          <button id="login-submit" class="primary-button login-submit" type="submit"><span id="login-submit-label">ورود به اتاق فرمان</span><span aria-hidden="true">←</span></button>
+          <div class="activate-row"><span id="activate-caption">اولین بار است وارد می‌شوی؟</span><button id="activate-mode" class="text-button" type="button">فعال‌سازی حساب مدیر</button></div>
+        </form>
+        <div class="login-security"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></svg><span>ورود امن با Supabase Auth <small>فقط برای مدیر تأییدشدهٔ استودیو</small></span></div>
+      </div>
+      <aside class="login-art" aria-label="تصویرسازی فضای طراحی رسانه میم">
+        <div class="art-grid" aria-hidden="true"></div><span class="art-kicker">YOUR NEXT BIG IDEA STARTS HERE</span>
+        <div class="orb orb-one" aria-hidden="true"></div><div class="orb orb-two" aria-hidden="true"></div>
+        <div class="art-composition" aria-hidden="true">
+          <div class="floating-label label-design"><span>✦</span> طراحی، بدون مرز</div>
+          <div class="browser-art"><div class="browser-top"><i></i><i></i><i></i><span>miim.studio / creative space</span></div><div class="browser-body"><div class="art-menu"><b>miim<span>®</span></b><span>ABOUT &nbsp; WORK &nbsp; CONTACT</span></div><div class="art-main"><span class="art-small">A LITTLE STRATEGY. A LOT OF SOUL.</span><strong>MAKE<br>IT <em>MATTER.</em></strong><div class="art-star">✳</div><div class="art-footer"><span>DESIGN THAT<br>MAKES A DIFFERENCE.</span><span>↗</span></div></div></div></div>
+          <div class="palette-card"><span>پالت خلاقیت</span><div><i></i><i></i><i></i><i></i></div><small>CURATED BY MIIM</small></div>
+          <div class="floating-label label-cloud"><span class="status-dot"></span> متصل به فضای ابری</div>
+          <div class="cursor-art">➤<span>شما، در مرکز خلاقیت</span></div>
+        </div>
+        <div class="art-copy"><span class="eyebrow">یک فضا، بی‌نهایت ایده</span><h2>همه‌چیز برای ساختن<br>یک تجربهٔ ماندگار.</h2><p>پروژه‌ها، ایده‌ها و هویت دیجیتال تو؛<br>مرتب، یکپارچه و همیشه در دسترس.</p></div><div class="art-bottom"><span>RESANE MIIM © 2026</span><span>STRATEGY × DESIGN × CODE</span></div>
+      </aside>
     </section>
 
-    <section id="dashboard" aria-labelledby="dashboard-title" hidden>
-      <div class="admin-toolbar"><h1 id="dashboard-title" tabindex="-1">مدیریت سایت</h1><button id="logout" class="btn btn--ghost" type="button">خروج</button></div>
-      <form id="editor">
-        <section class="admin-card"><h2>نمونه‌کارها</h2><p>مشخصات و لینک سایت هر پروژه را ویرایش کنید. برای آثار گرافیکی، لینک را خالی بگذارید.</p><div id="works-editor"></div></section>
-        <section class="admin-card"><h2>اطلاعات تماس</h2><div class="admin-grid">
-          <label>شماره تماس<input id="contact-phone" type="tel" required dir="ltr"></label>
-          <label>ایمیل<input id="contact-email" type="email" dir="ltr"></label>
-          <label>شناسه<input id="contact-id" dir="ltr"></label>
-        </div></section>
-        <div class="admin-actions"><button class="btn btn--gold" type="submit">ذخیره در این مرورگر</button><button id="download" class="btn btn--ghost" type="button">دریافت فایل انتشار (data.json)</button><a class="btn btn--ghost" href="../" target="_blank" rel="noopener">پیش‌نمایش سایت ↗</a></div>
-        <p id="save-status" role="status" aria-live="polite"></p>
-      </form>
-      <section class="admin-card"><h2>تغییر مشخصات ورود</h2><p>این تغییر در همین مرورگر ذخیره می‌شود؛ برای استفاده در مرورگرهای دیگر، بعد از تغییر، خروجی انتشار را دریافت کنید.</p>
-        <form id="credentials-form"><div class="admin-grid">
-          <label>نام کاربری جدید<input id="new-username" autocomplete="username" dir="ltr" minlength="3" required></label>
-          <label>رمز جدید<input id="new-password" type="password" autocomplete="new-password" dir="ltr" minlength="6" required></label>
-          <label>تکرار رمز جدید<input id="confirm-password" type="password" autocomplete="new-password" dir="ltr" minlength="6" required></label>
-        </div><button class="btn btn--ghost" type="submit">تغییر مشخصات ورود</button><p id="credentials-status" role="status" aria-live="polite"></p></form>
-      </section>
+    <section id="dashboard" class="dashboard-layout" aria-labelledby="dashboard-title" hidden>
+      <aside class="sidebar">
+        <div class="sidebar-heading"><span class="sidebar-mark">م</span><span>اتاق فرمان<small>MIIM WORKSPACE</small></span></div>
+        <span class="nav-caption">فضای مدیریت</span>
+        <nav class="side-nav" aria-label="بخش‌های مدیریت"><a class="is-active" href="#overview"><span>▦</span> نمای کلی <i>01</i></a><a href="#projects-section"><span>▧</span> نمونه‌کارها <i id="nav-count">۴</i></a><a href="#contact-section"><span>◎</span> اطلاعات تماس</a><a href="#security-section"><span>⚙</span> امنیت حساب</a></nav>
+        <div class="sidebar-note"><span>✳</span><h3>ایدهٔ بعدی از اینجاست.</h3><p>هر تغییر کوچک، یک قدم به تجربه‌ای بهتر نزدیک‌تر.</p><a href="../" target="_blank" rel="noopener">مشاهدهٔ وب‌سایت ↗</a></div>
+        <div class="sidebar-user"><span class="user-avatar">م</span><div><b>مدیر استودیو</b><small id="account-email"></small></div><button id="logout" type="button" aria-label="خروج از حساب" title="خروج">↪</button></div>
+      </aside>
+      <div class="dashboard-main" id="overview">
+        <header class="dashboard-header"><div><span class="eyebrow">WORKSPACE / OVERVIEW</span><h1 id="dashboard-title" tabindex="-1">سلام، به اتاق فرمان خوش آمدی <span>✦</span></h1><p>همه‌چیز برای مدیریت یک حضور دیجیتال ماندگار، همین‌جاست.</p></div><a class="outline-button" href="../" target="_blank" rel="noopener">مشاهده سایت <span>↗</span></a></header>
+        <div class="overview-grid"><article class="stat-card"><span class="stat-icon">▧</span><p>نمونه‌کارهای منتشرشده</p><strong id="work-count">—</strong><small>پروژه در ویترین استودیو</small></article><article class="stat-card"><span class="stat-icon peach">⌘</span><p>وب‌سایت‌های طراحی‌شده</p><strong id="web-count">—</strong><small>همراه با لینک مشاهدهٔ سایت</small></article><article class="stat-card"><span class="stat-icon lilac">◈</span><p>فضای ذخیره‌سازی</p><strong class="cloud-stat">Supabase <span class="status-dot"></span></strong><small id="cloud-status">در حال بررسی اتصال</small></article><article class="stat-card"><span class="stat-icon sand">↻</span><p>آخرین به‌روزرسانی</p><strong class="date-stat" id="last-update">—</strong><small id="revision-label">نسخهٔ ابری محتوا</small></article></div>
+        <div class="workspace-banner"><div><span class="eyebrow">CREATE. CURATE. INSPIRE.</span><h2>ویترینت را به‌روز نگه دار.</h2><p>پروژه‌های تو، بهترین روایت از توانایی‌های تو هستند.</p></div><span aria-hidden="true">✳</span></div>
+        <form id="editor">
+          <section class="editor-section" id="projects-section"><div class="section-heading"><div><span class="eyebrow">SELECTED WORKS</span><h2>مدیریت نمونه‌کارها</h2><p>عنوان، داستان و لینک هر پروژه را از اینجا ویرایش کن.</p></div><span class="section-chip">تغییرات با دکمهٔ انتشار ذخیره می‌شوند</span></div><div id="works-editor" class="projects-grid"></div></section>
+          <section class="editor-section" id="contact-section"><div class="section-heading"><div><span class="eyebrow">LET’S CONNECT</span><h2>اطلاعات تماس</h2><p>راه‌های ارتباطی استودیو را همیشه به‌روز نگه دار.</p></div><span class="section-symbol" aria-hidden="true">◎</span></div><div class="contact-fields"><label>شماره تماس<input id="contact-phone" type="tel" required dir="ltr"></label><label>آدرس ایمیل<input id="contact-email" type="email" dir="ltr"></label><label>شناسهٔ شبکه اجتماعی<input id="contact-id" dir="ltr"></label></div></section>
+          <div class="publish-bar"><div><span id="dirty-indicator" class="status-dot"></span><b id="draft-state">همه‌چیز به‌روز است</b><p id="save-status" role="status" aria-live="polite">تغییرات پس از انتشار برای همه قابل مشاهده‌اند.</p></div><div class="publish-actions"><button id="refresh-content" class="outline-button" type="button">تازه‌سازی ↻</button><button id="download" class="icon-button" type="button" title="دریافت نسخهٔ پشتیبان" aria-label="دریافت نسخهٔ پشتیبان">↓</button><button id="publish" class="primary-button" type="submit">ذخیره و انتشار <span>↗</span></button></div></div>
+        </form>
+        <section class="editor-section security-section" id="security-section"><div class="section-heading"><div><span class="eyebrow">ACCOUNT SECURITY</span><h2>امنیت حساب</h2><p>رمز عبور جدید مستقیماً در Supabase Auth ثبت می‌شود.</p></div><span class="section-symbol" aria-hidden="true">⌘</span></div><form id="credentials-form"><div class="contact-fields"><label>رمز عبور فعلی<input id="current-password" type="password" autocomplete="current-password" dir="ltr" required></label><label>رمز جدید<input id="new-password" type="password" autocomplete="new-password" dir="ltr" minlength="8" required></label><label>تکرار رمز جدید<input id="confirm-password" type="password" autocomplete="new-password" dir="ltr" minlength="8" required></label></div><button class="outline-button" type="submit">به‌روزرسانی رمز عبور</button><p id="credentials-status" class="form-feedback" role="status" aria-live="polite"></p></form></section>
+        <footer class="dashboard-footer"><span>ساخته‌شده با دقت، برای خلق با آزادی.</span><span>MIIM STUDIO / CONTROL ROOM</span></footer>
+      </div>
     </section>
-    <noscript>برای ورود و مدیریت سایت، جاوااسکریپت مرورگر را فعال کنید.</noscript>
+    <section id="recovery-view" class="recovery-card" hidden aria-labelledby="recovery-title"><span class="eyebrow">ACCOUNT RECOVERY</span><h1 id="recovery-title">انتخاب رمز عبور جدید</h1><p>لینک بازیابی تأیید شد. رمز جدیدت را وارد کن.</p><form id="recovery-form"><label>رمز جدید<input id="recovery-password" type="password" dir="ltr" autocomplete="new-password" minlength="8" required></label><label>تکرار رمز<input id="recovery-confirm" type="password" dir="ltr" autocomplete="new-password" minlength="8" required></label><p id="recovery-status" class="form-feedback" role="alert"></p><button class="primary-button" type="submit">ثبت رمز جدید</button></form></section>
   </main>
+  <footer id="login-footer" class="login-footer"><span>© تمامی حقوق برای استودیو رسانه میم محفوظ است.</span><span><i class="status-dot"></i> فضای امن مدیریت استودیو</span></footer>
+  <noscript>برای استفاده از پنل، جاوااسکریپت مرورگر را فعال کنید.</noscript>
 </body>
 </html>
