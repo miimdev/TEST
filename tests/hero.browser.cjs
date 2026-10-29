@@ -25,8 +25,28 @@ const baseline=JSON.parse(fs.readFileSync(path.join(__dirname,'../data.json'),'u
   assert.match(await page.locator('#hero-photo').getAttribute('alt'),/مجتبی/);
   assert.equal(await page.locator('#hero-stage canvas').count(),0);
   assert.equal(await page.locator('.reactor-prism').count(),0);
+  // The entrance must be visible AFTER the global loader, not spent behind it.
+  await page.waitForFunction(()=>document.getElementById('hero-stage').classList.contains('is-poster-entering'));
   await page.locator('#hero-replay').click();
   await page.waitForFunction(()=>document.getElementById('hero-stage').classList.contains('is-poster-entering'));
+  const sequence=await page.evaluate(()=>{
+    const stage=document.getElementById('hero-stage');
+    const animations=stage.getAnimations({subtree:true});
+    const photo=animations.find(a=>a.animationName==='poster-photo-enter');
+    const name=animations.find(a=>a.animationName==='poster-name-enter'&&a.effect.target.tagName==='STRONG');
+    const sample=time=>{photo.currentTime=time;return getComputedStyle(photo.effect.target).clipPath;};
+    return {early:sample(350),late:sample(1600),photoDelay:photo.effect.getTiming().delay,nameDelay:name.effect.getTiming().delay,names:animations.map(a=>a.animationName)};
+  });
+  assert.notEqual(sequence.early,sequence.late);
+  assert.ok(sequence.photoDelay<sequence.nameDelay);
+  for(const name of ['poster-paper-enter','poster-type-enter','poster-rule-enter','poster-signature-enter','poster-intro-light','poster-stamp-enter'])assert.ok(sequence.names.includes(name),name);
+  // A second replay must reset the animation rather than retaining the old time.
+  await page.locator('#hero-replay').click();
+  await page.waitForFunction(()=>{
+    const animation=document.getElementById('hero-stage').getAnimations({subtree:true}).find(a=>a.animationName==='poster-photo-enter');
+    return animation&&animation.currentTime<300;
+  });
+  await page.waitForFunction(()=>!document.getElementById('hero-stage').classList.contains('is-poster-entering'));
   await page.locator('#portrait-poster').hover({position:{x:60,y:90}});
   await page.waitForFunction(()=>document.getElementById('portrait-poster').style.getPropertyValue('--poster-light-x')!=='');
   assert.equal(await page.locator('#hero-photo').evaluate(el=>getComputedStyle(el).transform),'none');
@@ -34,6 +54,8 @@ const baseline=JSON.parse(fs.readFileSync(path.join(__dirname,'../data.json'),'u
   assert.equal(await page.locator('#hero-stage').getAttribute('data-poster-state'),'paused');
   assert.equal(await page.locator('#hero-replay').isDisabled(),true);
   assert.equal(await page.locator('.poster-ink').evaluate(el=>getComputedStyle(el).animationPlayState),'paused');
+  assert.equal(await page.locator('.poster-photo-wrap').evaluate(el=>getComputedStyle(el,'::before').animationPlayState),'paused');
+  assert.equal(await page.locator('.poster-rule').first().evaluate(el=>getComputedStyle(el,'::after').animationPlayState),'paused');
   await page.reload();await page.locator('#loader').waitFor({state:'detached'});
   assert.equal(await page.locator('#hero-stage').getAttribute('data-poster-state'),'paused');
   await page.locator('#hero-motion-toggle').click();
@@ -46,6 +68,8 @@ const baseline=JSON.parse(fs.readFileSync(path.join(__dirname,'../data.json'),'u
   await page.waitForFunction(()=>document.getElementById('hero-stage').dataset.posterState==='reduced');
   assert.equal(await page.locator('#hero-motion-toggle').isDisabled(),true);
   assert.equal(await page.locator('.poster-ink').evaluate(el=>getComputedStyle(el).animationName),'none');
+  assert.equal(await page.locator('.poster-photo-wrap').evaluate(el=>getComputedStyle(el,'::before').animationName),'none');
+  assert.equal(await page.locator('.poster-rule').first().evaluate(el=>getComputedStyle(el,'::after').animationName),'none');
   await page.evaluate(()=>document.documentElement.dataset.theme='light');
   if(process.env.SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.SCREENSHOT_DIR,'portrait-light.png')});
   data.identity.photo='proj-1.jpg';data.identity.name='نام جدید مدیر';
@@ -73,6 +97,6 @@ const baseline=JSON.parse(fs.readFileSync(path.join(__dirname,'../data.json'),'u
   await mobile.page.locator('.hero__actions a[href="#contact"]').click();
   await mobile.page.waitForFunction(()=>location.hash==='#contact');
   await mobile.context.close();assert.deepEqual(errors,[]);
-  console.log('PASS: original portrait, flat graphics/no 3D, reveal/replay, light-only pointer response, pause persistence, offscreen/reduced motion, CMS photo/name updates, lifecycle, mobile/light and CTA.');
+  console.log('PASS: original portrait, flat graphics/no 3D, post-loader staged choreography/rapid replay, paused/reduced-motion light trails, light-only pointer response, pause persistence, offscreen/reduced motion, CMS photo/name updates, lifecycle, mobile/light and CTA.');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

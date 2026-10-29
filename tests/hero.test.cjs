@@ -14,3 +14,10 @@ test('hero keeps original portrait, CMS bindings and motion controls without 3D 
   const css=fs.readFileSync(path.join(__dirname,'../style.css'),'utf8').split('/* Flat editorial portrait.')[1].split('/* نوار آمار هیرو */')[0];
   assert.doesNotMatch(css,/perspective:|rotateX\(|rotateY\(|translateZ\(|preserve-3d/);
 });
+
+test('editorial timeline accommodates the last delayed light pass',()=>{
+  assert.equal(hero.INTRO_DURATION,2600);
+  const css=fs.readFileSync(path.join(__dirname,'../style.css'),'utf8');
+  assert.match(css,/poster-intro-light 1\.1s ease-in-out 1\.25s/);
+  assert.ok(hero.INTRO_DURATION>2350);
+});
