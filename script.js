@@ -351,11 +351,6 @@ const DEFAULT_SITE = {
       const img = $(sel);
       if (img) img.src = logoUrl;
     });
-    const heroPhoto = $("#hero-photo");
-    if (heroPhoto) {
-      heroPhoto.src = imgSrc(id.photo || "My-photo.png");
-      heroPhoto.alt = `${id.name} — ${id.brand}`;
-    }
     document.title = SITE.seo?.title || `${id.brand} | ${id.name} — ${id.roleFa}`;
     const description = SITE.seo?.description || id.heroBio;
     $('meta[name="description"]')?.setAttribute('content', description);
@@ -687,7 +682,9 @@ const DEFAULT_SITE = {
   function initGoldCanvas() {
     const canvas = $("#cinema-canvas");
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    let ctx = null;
+    try { ctx = canvas.getContext("2d"); } catch { return; }
+    if (!ctx) return;
     let w = 0, h = 0;
 
     const resize = () => {
@@ -1221,33 +1218,18 @@ const DEFAULT_SITE = {
     els.forEach((el) => io.observe(el));
   }
 
-  /* ---------- حلقه سینمایی اسکرول، عمق هیرو، پارالاکس ۳بعدی پرتره و Marquee ---------- */
+  /* ---------- حلقه سینمایی اسکرول و Marquee؛ صحنهٔ هیرو چرخهٔ مستقل دارد ---------- */
   function initScrollytellingLoop() {
     const fill = $("#scroll-fill");
     const toTop = $("#to-top");
     const hero = $("#hero");
     const heroSticky = $("#hero-sticky");
-    const heroPhoto = $("#hero-photo");
-    const heroArch = $("#portrait-arch");
-    const heroIcons = $("#hero-icons");
-    const heroHalo = $("#hero-halo");
     const marqueeTrack = $("#marquee-track");
 
     toTop?.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
     let lastY = window.scrollY;
     let marqueeX = 0;
-
-    // پارالاکس ماوس روی صحنه پرتره هیرو
-    let ptx = 0, pty = 0, pcx = 0, pcy = 0;
-    if (FINE_POINTER && hero) {
-      hero.addEventListener("pointermove", (e) => {
-        const r = hero.getBoundingClientRect();
-        ptx = ((e.clientX - r.left) / r.width - 0.5) * 2; // -1..1
-        pty = ((e.clientY - r.top) / r.height - 0.5) * 2;
-      }, { passive: true });
-      hero.addEventListener("pointerleave", () => { ptx = 0; pty = 0; });
-    }
 
     const frame = () => {
       const y = window.scrollY;
@@ -1261,7 +1243,7 @@ const DEFAULT_SITE = {
       if (toTop) toTop.classList.toggle("is-visible", y > 500);
 
       // افکت دوربین سینمایی عقب‌نشینی هیرو هنگام بالا آمدن شیت محتوا (دسکتاپ)
-      if (heroSticky && window.innerWidth > 980) {
+      if (heroSticky && window.innerWidth > 980 && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         const hh = hero.offsetHeight || window.innerHeight;
         const p = clamp(y / (hh * 0.9), 0, 1);
         const sc = 1 - p * 0.085;
@@ -1272,16 +1254,6 @@ const DEFAULT_SITE = {
       } else if (heroSticky) {
         heroSticky.style.transform = "";
         heroSticky.style.opacity = "";
-      }
-
-      // پارالاکس ۳بعدی چندلایه روی پرتره و آیکون‌های شناور
-      if (FINE_POINTER && y < window.innerHeight * 1.2) {
-        pcx = lerp(pcx, ptx, 0.075);
-        pcy = lerp(pcy, pty, 0.075);
-        if (heroPhoto) heroPhoto.style.transform = `translate3d(${(pcx * 14).toFixed(1)}px, ${(pcy * 9).toFixed(1)}px, 0)`;
-        if (heroArch) heroArch.style.transform = `rotateY(${(pcx * 6).toFixed(2)}deg) rotateX(${(-pcy * 5).toFixed(2)}deg)`;
-        if (heroIcons) heroIcons.style.transform = `translate3d(${(-pcx * 18).toFixed(1)}px, ${(-pcy * 12).toFixed(1)}px, 0)`;
-        if (heroHalo) heroHalo.style.transform = `translate3d(${(-pcx * 24).toFixed(1)}px, ${(-pcy * 16).toFixed(1)}px, 0)`;
       }
 
       // حرکت پیوسته Marquee واکنش‌گرا به سرعت اسکرول

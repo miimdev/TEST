@@ -243,9 +243,9 @@ const base = process.env.TEST_BASE_URL || 'http://127.0.0.1:8000';
     assert.match(await rubika.getAttribute('rel'),/noopener/);
     assert.equal(await rubika.locator('img').getAttribute('src'),'Image/rubika.png');
     await home.waitForFunction(()=>document.querySelector('#social-links img').complete && document.querySelector('#social-links img').naturalWidth>0);
-    assert.equal(await home.locator('#hero-photo').getAttribute('draggable'),'false');
+    assert.equal(await home.locator('#badge-logo').getAttribute('draggable'),'false');
     for(const type of ['contextmenu','dragstart','selectstart']) {
-      assert.equal(await home.locator('#hero-photo').evaluate((el,type)=>!el.dispatchEvent(new Event(type,{bubbles:true,cancelable:true})),type),true);
+      assert.equal(await home.locator('#badge-logo').evaluate((el,type)=>!el.dispatchEvent(new Event(type,{bubbles:true,cancelable:true})),type),true);
       assert.equal(await home.locator('.stage-card__overlay').first().evaluate((el,type)=>!el.dispatchEvent(new Event(type,{bubbles:true,cancelable:true})),type),true);
       assert.equal(await home.locator('#order-form input:not([type=hidden])').first().evaluate((el,type)=>!el.dispatchEvent(new Event(type,{bubbles:true,cancelable:true})),type),false);
     }
