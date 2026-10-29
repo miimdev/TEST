@@ -7,14 +7,15 @@
   <meta name="theme-color" content="#070709">
   <title>اتاق فرمان | رسانه میم</title>
   <link rel="icon" href="../Image/logo.png">
-  <link rel="stylesheet" href="../style.css?v=37ba3a161566">
-  <link rel="stylesheet" href="admin.css?v=60a3f98bf39d">
-  <script src="../vendor/miim-cloud.js?v=ec9161168d5d" defer></script>
+  <link rel="stylesheet" href="../style.css?v=f33a48a08852">
+  <link rel="stylesheet" href="admin.css?v=7e1227783643">
+  <script src="../vendor/miim-cloud.js?v=992e807fee2f" defer></script>
   <script src="../content.js?v=177488c22bf1" defer></script>
   <script src="../store.js?v=15ceb76922e5" defer></script>
   <script src="motion.js?v=2ef15a9a61cd" defer></script>
-  <script src="cms.js?v=77ccfd475bef" defer></script>
-  <script src="admin.js?v=2e561e96b48a" defer></script>
+  <script src="cms.js?v=72c3fe0cb28f" defer></script>
+  <script src="rubika.js?v=7953746e25cf" defer></script>
+  <script src="admin.js?v=352c25cb791b" defer></script>
 </head>
 <body class="admin-page">
   <div class="page-grain" aria-hidden="true"></div><div class="ambient-light" aria-hidden="true"></div>
@@ -62,7 +63,7 @@
       <aside class="sidebar">
         <div class="sidebar-heading"><span class="sidebar-mark">م</span><span>اتاق فرمان<small>MIIM WORKSPACE</small></span></div>
         <span class="nav-caption">فضای مدیریت</span>
-        <nav class="side-nav" aria-label="بخش‌های مدیریت"><a class="is-active" href="#overview"><span>▦</span> نمای کلی <i>01</i></a><a href="#projects-section"><span>▧</span> نمونه‌کارها <i id="nav-count">۴</i></a><a href="#contact-section"><span>◎</span> اطلاعات تماس</a><a href="#identity-section"><span>✦</span> هویت و هیرو</a><a href="#services-section"><span>⌘</span> خدمات و مهارت‌ها</a><a href="#social-section"><span>◎</span> شبکه‌های اجتماعی</a><a href="#backup-section"><span>↻</span> پشتیبان و تاریخچه</a><a href="#security-section"><span>⚙</span> امنیت حساب</a></nav>
+        <nav class="side-nav" aria-label="بخش‌های مدیریت"><a class="is-active" href="#overview"><span>▦</span> نمای کلی <i>01</i></a><a href="#projects-section"><span>▧</span> نمونه‌کارها <i id="nav-count">۴</i></a><a href="#contact-section"><span>◎</span> اطلاعات تماس</a><a href="#identity-section"><span>✦</span> هویت و هیرو</a><a href="#services-section"><span>⌘</span> خدمات و مهارت‌ها</a><a href="#social-section"><span>◎</span> شبکه‌های اجتماعی</a><a href="#backup-section"><span>↻</span> پشتیبان و تاریخچه</a><a href="#rubika-section"><span>✉</span> سفارش‌ها و روبیکا</a><a href="#security-section"><span>⚙</span> امنیت حساب</a></nav>
         <div class="sidebar-note"><span>✳</span><h3>ایدهٔ بعدی از اینجاست.</h3><p>هر تغییر کوچک، یک قدم به تجربه‌ای بهتر نزدیک‌تر.</p><a href="../" target="_blank" rel="noopener">مشاهدهٔ وب‌سایت ↗</a></div>
         <div class="sidebar-user"><span class="user-avatar">م</span><div><b>مدیر استودیو</b><small id="account-email"></small></div><button id="logout" type="button" aria-label="خروج از حساب" title="خروج">↪</button></div>
       </aside>
@@ -78,6 +79,12 @@
           <div class="publish-bar"><div><span id="dirty-indicator" class="status-dot"></span><b id="draft-state">همه‌چیز به‌روز است</b><p id="save-status" role="status" aria-live="polite">تغییرات پس از انتشار برای همه قابل مشاهده‌اند.</p></div><div class="publish-actions"><button id="refresh-content" class="outline-button" type="button">تازه‌سازی ↻</button><button id="download" class="icon-button" type="button" title="دریافت نسخهٔ پشتیبان" aria-label="دریافت نسخهٔ پشتیبان">↓</button><button id="publish" class="primary-button" type="submit">ذخیره و انتشار <span>↗</span></button></div></div>
         </form>
         <section class="editor-section" id="backup-section"><div class="section-heading"><div><span class="eyebrow">BACKUP & VERSION HISTORY</span><h2>پشتیبان و تاریخچهٔ انتشار</h2><p>بازگردانی فقط پیش‌نویس می‌سازد؛ برای نمایش عمومی باید دوباره منتشرش کنی.</p></div></div><div class="backup-card"><div class="backup-actions"><button id="import-content" class="outline-button" type="button">ورود فایل پشتیبان JSON</button><input id="import-file" type="file" accept="application/json,.json" hidden><button id="load-history" class="outline-button" type="button">دریافت تاریخچهٔ ابری</button><button id="reset-draft" class="outline-button" type="button">لغو تغییرات و بازگشت به نسخهٔ منتشرشده</button></div><p class="helper-text">۳۰ نسخهٔ قبلی در دیتابیس نگه داشته می‌شود. آپلود تصویر قبل از انتشار فقط فایل را ذخیره می‌کند، نه محتوای سایت را.</p><p id="backup-status" class="form-feedback" role="status" aria-live="polite"></p><div id="history-list" class="history-list"></div></div></section>
+        <section class="editor-section" id="rubika-section">
+          <div class="section-heading"><div><span class="eyebrow">PRIVATE INBOX / RUBIKA</span><h2>سفارش‌ها و ربات روبیکا</h2><p>توکن فقط در سرور است. پیام‌ها صرفاً به پیوی تأییدشدهٔ شما می‌روند.</p></div></div>
+          <div class="backup-card"><div class="backup-actions"><a class="outline-button" href="https://rubika.ir/miimsite_bot" target="_blank" rel="noopener noreferrer">بازکردن ربات ↗</a><button id="bot-status" class="outline-button" type="button">بررسی اتصال</button><button id="bot-prepare" class="outline-button" type="button">ساخت کد اتصال پیوی</button><button id="bot-connect" class="outline-button" type="button" disabled>کد را فرستادم؛ تأیید اتصال</button><button id="bot-test" class="outline-button" type="button">ارسال پیام آزمایشی</button><button id="bot-inbox" class="primary-button" type="button">دریافت سفارش‌ها</button></div>
+          <p class="helper-text">کد فقط ۱۰ دقیقه معتبر است؛ آن را در پیوی ربات بفرستید، نه گروه یا کانال. سپس تأیید اتصال و پیام آزمایشی را بزنید. سفارش‌ها ۹۰ روز در صندوق خصوصی می‌مانند. خطای روبیکا سفارش را حذف نمی‌کند.</p>
+          <p id="bot-code" class="bot-pair-code" dir="ltr" hidden></p><p id="bot-feedback" class="form-feedback" role="status" aria-live="polite"></p><div id="bot-orders" class="bot-orders"></div></div>
+        </section>
         <section class="editor-section security-section" id="security-section"><div class="section-heading"><div><span class="eyebrow">ACCOUNT SECURITY</span><h2>امنیت حساب</h2><p>رمز عبور جدید مستقیماً در Supabase Auth ثبت می‌شود.</p></div><span class="section-symbol" aria-hidden="true">⌘</span></div><form id="credentials-form"><div class="contact-fields"><label>رمز عبور فعلی<input id="current-password" type="password" autocomplete="current-password" dir="ltr" required></label><label>رمز جدید<input id="new-password" type="password" autocomplete="new-password" dir="ltr" minlength="8" required></label><label>تکرار رمز جدید<input id="confirm-password" type="password" autocomplete="new-password" dir="ltr" minlength="8" required></label></div><button class="outline-button" type="submit">به‌روزرسانی رمز عبور</button><p id="credentials-status" class="form-feedback" role="status" aria-live="polite"></p></form></section>
         <footer class="dashboard-footer"><span>ساخته‌شده با دقت، برای خلق با آزادی.</span><span>MIIM STUDIO / CONTROL ROOM</span></footer>
       </div>

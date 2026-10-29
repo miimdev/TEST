@@ -12,7 +12,7 @@
     process:['process-section','مراحل همکاری','عنوان و توضیح مرحله‌ها', {step:['شماره یا برچسب مرحله',20],title:['عنوان',150],desc:['توضیحات',1600,'textarea']}],
     testimonials:['testimonials-section','نظرات مشتریان','ویرایش متن، نام و امتیاز نظرها', {name:['نام مشتری',100],role:['سمت / شرکت',150],quote:['متن نظر',2000,'textarea'],rating:['امتیاز از ۵',5,'number',1]}],
     platforms:['social-section','شبکه‌های اجتماعی','آدرس‌های معتبر با http یا https', {key:['شبکه',0,'select',C.platforms],label:['عنوان نمایشی',50],url:['آدرس',2048,'url']}],
-    contact:['contact-copy-section','متن بخش تماس','تیترها، آدرس و مقصد فرم سفارش', {eyebrow:['برچسب',150],heading:['عنوان تماس',350],lead:['متن دعوت به همکاری',1600,'textarea'],address:['نشانی',400],formspree:['آدرس دریافت فرم سفارش (Formspree)',2048,'url']}],
+    contact:['contact-copy-section','متن بخش تماس','تیترها و آدرس؛ سفارش‌ها در صندوق خصوصی و روبیکا ثبت می‌شوند', {eyebrow:['برچسب',150],heading:['عنوان تماس',350],lead:['متن دعوت به همکاری',1600,'textarea'],address:['نشانی',400]}],
     seo:['seo-section','تنظیمات جست‌وجو و سایت','عنوان نتایج جست‌وجو و توضیح کوتاه', {title:['عنوان صفحه (خالی = عنوان خودکار)',180],description:['توضیح متا و اشتراک‌گذاری',400,'textarea']}],
     footer:['footer-section','پاورقی','متن حقوق و مالکیت سایت', {legal:['متن حقوقی',1000,'textarea']}],
   };

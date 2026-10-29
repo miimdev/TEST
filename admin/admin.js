@@ -81,6 +81,7 @@
     $('toggle-password').setAttribute('aria-label', 'نمایش رمز عبور');
     $('credentials-form').reset();
     currentUser = null;
+    window.dispatchEvent(new Event('miim:logout'));
   }
   function showRecovery() {
     recovery = true;
@@ -195,6 +196,7 @@
     $('password').value = ''; $('account-email').textContent = currentUser.email;
     $('dashboard-title').focus();
     message('status', 'متصل به Supabase');
+    window.dispatchEvent(new Event('miim:dashboard'));
   }
   function readDraft() {
     const works = Array.from(document.querySelectorAll('.work-editor'), group => {
@@ -241,6 +243,10 @@
       data = row.data; revision = row.revision; clearDraft(); setDirty(false); renderEditor();
       channel?.postMessage('saved');
       message('save-status', 'ذخیره و منتشر شد؛ محتوای جدید برای همهٔ بازدیدکننده‌ها نمایش داده می‌شود.');
+      // Notification failure must never turn a successful publication into a failed save.
+      cloud.bot('published', { revision }).then(result => {
+        if (!$('dashboard').hidden && result.delivery !== 'sent' && result.delivery !== 'already_attempted') message('bot-feedback','محتوا منتشر شد؛ اعلان روبیکا ارسال نشد. اتصال را بررسی کنید.',true);
+      }).catch(() => { if (!$('dashboard').hidden) message('bot-feedback','محتوا منتشر شد؛ ارتباط اعلان روبیکا برقرار نشد.',true); });
     } finally { setBusy(false); }
   }
   async function load() {
