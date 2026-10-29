@@ -6,10 +6,11 @@
   "scripts": {
     "build:cloud": "esbuild lib/cloud.js --bundle --minify --format=iife --outfile=vendor/miim-cloud.js --legal-comments=linked --supported:template-literal=false",
     "test": "node --test tests/*.test.cjs",
-    "test:browser": "node tests/admin.browser.cjs",
+    "test:browser": "node tests/admin.browser.cjs && node tests/skills.browser.cjs",
     "version:assets": "node scripts/version-assets.cjs",
     "build": "npm run build:cloud && npm run version:assets",
-    "build:edge": "esbuild supabase/functions/miim-rubika/index.mjs --bundle --minify --format=esm --platform=neutral --charset=utf8 --supported:template-literal=false --outfile=.cache/miim-rubika-deploy.mjs"
+    "build:edge": "esbuild supabase/functions/miim-rubika/index.mjs --bundle --minify --format=esm --platform=neutral --charset=utf8 --supported:template-literal=false --outfile=.cache/miim-rubika-deploy.mjs",
+    "test:skills:browser": "node tests/skills.browser.cjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.118.0"

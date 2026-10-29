@@ -387,25 +387,7 @@ const DEFAULT_SITE = {
         </li>`).join("");
     }
 
-    const slist = $("#skills-list");
-    if (slist) {
-      slist.innerHTML = SITE.skills.map((s) => {
-        const p = clamp(Math.round(+s.percent || 0), 0, 100);
-        return `
-          <div class="skill-row">
-            <div class="skill-row__top">
-              <span class="skill-row__name">${esc(s.name)}</span>
-              <span class="skill-row__meta">
-                ${s.tag ? `<span class="skill-row__tag" dir="ltr">${esc(s.tag)}</span>` : ""}
-                <span class="skill-row__pct" data-count="${p}" data-suffix="٪">۰٪</span>
-              </span>
-            </div>
-            <div class="skill-row__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}">
-              <span class="skill-row__fill" data-width="${p}"></span>
-            </div>
-          </div>`;
-      }).join("");
-    }
+    window.MiimSkills.mount(SITE.skills);
   }
 
   function renderServices() {
@@ -1225,7 +1207,6 @@ const DEFAULT_SITE = {
     const els = $$("[data-cinematic]:not(.is-visible)");
     if (!("IntersectionObserver" in window)) {
       els.forEach((el) => el.classList.add("is-visible"));
-      $$(".skill-row__fill").forEach((f) => (f.style.width = f.dataset.width + "%"));
       return;
     }
     const io = new IntersectionObserver((entries) => {
@@ -1234,11 +1215,6 @@ const DEFAULT_SITE = {
         const el = en.target;
         el.classList.add("is-visible");
         $$("[data-count]", el).forEach(countUp);
-        if (el.id === "skills-card") {
-          $$(".skill-row__fill", el).forEach((f, idx) => {
-            setTimeout(() => { f.style.width = f.dataset.width + "%"; }, 220 + idx * 130);
-          });
-        }
         io.unobserve(el);
       });
     }, { threshold: 0.14, rootMargin: "0px 0px -5% 0px" });
